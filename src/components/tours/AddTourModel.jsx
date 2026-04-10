@@ -9,12 +9,22 @@ const AddTourModal = ({  onClose, formData, setFormData, onSubmit }) => {
         <input
           className="w-full border p-2 mb-2"
           placeholder="Title"
+          value={formData.title}
           onChange={(e) =>
-            setFormData({ ...formData, title: e.target.value })
+            setFormData({ ...formData, title: e.target.value})
+          }
+        />
+        <input
+        className="w-full border p-2 mb-2"
+          placeholder="Description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
           }
         />
         <input
           className="w-full border p-2 mb-2"
+          value={formData.location}
           placeholder="Location"
           onChange={(e) =>
             setFormData({ ...formData, location: e.target.value })
@@ -23,11 +33,30 @@ const AddTourModal = ({  onClose, formData, setFormData, onSubmit }) => {
 
         <input
           className="w-full border p-2 mb-2"
+          value={formData.price}
           placeholder="Price"
           onChange={(e) =>
             setFormData({ ...formData, price: e.target.value })
           }
         />
+        <input
+            type="number"
+            className="w-full border p-2 mb-2"
+            placeholder="Duration"
+            value={formData.duration}
+            onChange={(e) =>
+              setFormData({ ...formData, duration: e.target.value })
+            }
+          />
+        <input
+            type="number"
+            className="w-full border p-2 mb-2"
+            placeholder="Max People"
+            value={formData.max_people}
+            onChange={(e) =>
+              setFormData({ ...formData, max_people: e.target.value })
+            }
+          />
         <input
           type="file"
           onChange={(e) =>

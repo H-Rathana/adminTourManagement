@@ -9,16 +9,16 @@ const TourCard = ({ tour, onDelete, onEdit }) => {
       />
 
       <h2 className="font-bold mt-2">{tour.title}</h2>
-      <p>{tour.location}</p>
-      <p>${tour.price}</p>
+      <p>📍{tour.location} , Cambodia<span className="ml-5">⌛{tour.duration}days</span></p>
+      <p><span>👥{tour.max_people}</span>💲{tour.price}</p>
 
       <div className="flex gap-2 mt-3">
-        <button onClick={() => onEdit(tour)} className="bg-blue-600 text-white px-3 py-1 rounded">
+        <button onClick={() => onEdit(tour)} className="bg-sky-500 text-white px-3 py-1 rounded">
            Edit
         </button>
 
         <button
-          onClick={() => onDelete(tour.id)}
+          onClick={() => onDelete(tour.tour_id)}
           className="bg-red-500 text-white px-3 py-1 rounded"
         >
           Delete

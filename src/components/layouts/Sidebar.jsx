@@ -7,8 +7,11 @@ const Sidebar = () => {
         <h1 className="text-xl font-bold p-5">🌴 WanderEscape</h1>
 
         <nav className="flex flex-col gap-2 px-4">
-          <Link to="/tours" className="p-2 rounded bg-slate-700">
-            Tours
+          <Link to="/tours" className="p-2 rounded hover:bg-sky-700 ">
+            🗺️Tours
+          </Link>     
+          <Link to="/bookings" className="p-2 rounded hover:bg-sky-700 ">
+            📋Bookings
           </Link>
         </nav>
       </div>
