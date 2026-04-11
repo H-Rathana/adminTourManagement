@@ -1,132 +1,111 @@
+import { useEffect, useState } from "react";
 import Layout from "../components/layouts/Layout";
+import {getBookings,approveBooking,rejectBooking} from "../services/api";
+import toast from "react-hot-toast";
 
-const bookings = [
-  {
-    id: "BK-001",
-    name: "Rarah Mitchell",
-    email: "sarah@email.com",
-    tour: "Bali Sacred Temple Trail",
-    date: "2026-04-12",
-    total: "$2,598",
-    status: "Confirmed",
-  },
-  {
-    id: "BK-002",
-    name: "James Okafor",
-    email: "james@email.com",
-    tour: "Machu Picchu Trek",
-    date: "2026-04-18",
-    total: "$5,697",
-    status: "Pennding",
-  },
-  {
-    id: "BK-003",
-    name: "Priya Sharma",
-    email: "priya@email.com",
-    tour: "Maldives Island Hopper",
-    date: "2026-05-02",
-    total: "$4,998",
-    status: "Cancelled",
-  },
-];
+
+
+const successApproved = () => {
+  toast.success("Booking have been Confirm 🎉");
+};
+ const successRejected = () => {
+  toast.success("Booking have been Rejected❌");
+};
 
 const Bookings = () => {
+  const [bookings, setBookings] = useState([]);
+  const [filter, setFilter] = useState("all");
+
+const filteredBookings = bookings.filter((booking) => {
+  if (filter === "all") return true;
+  return booking.status === filter;
+});
+  // FETCH
+  const fetchBookings = async () => {
+    try {
+      const res = await getBookings();
+      setBookings(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+  fetchBookings( 
+
+  );
+}, []);
+
+  // ✅ CONFIRM
+ const handleConfirm = async (id) => {
+  try {
+    await approveBooking(id);
+    fetchBookings();
+    successApproved();
+  } catch (err) {
+    console.log(err);
+    console.error(err);
+
+  }
+};
+
+const handleCancel = async (id) => {
+  const confirmAction = window.confirm("Cancel this booking?");
+  if (!confirmAction) return;
+
+  try {
+    await rejectBooking(id);
+    fetchBookings();
+    successRejected();
+  } catch (err) {
+    console.log(err);
+    console.error(err);
+  }
+};
+
   return (
     <Layout>
-      {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Bookings</h1>
-        <p className="text-gray-500"> total bookings</p>
+      <h1 className="text-2xl font-bold mb-4">Bookings</h1>
+      <div className="flex gap-10 justify-end p-5">
+        <button onClick={() => setFilter("all")} className="btn  ">All</button>
+        <button onClick={() => setFilter("approved")} className="btn">Approved</button>
+        <button onClick={() => setFilter("pending")} className="btn">Pending</button>
+        <button onClick={() => setFilter("rejected")} className="btn">Rejected</button>
       </div>
-
-      {/* SEARCH + FILTER */}
-      <div className="flex justify-between items-center mb-4 gap-4">
-        <input
-          type="text"
-          placeholder="🔍 Search..."
-          className="w-full max-w-md px-4 py-2 border rounded-lg focus:outline-none"
-        />
-
-        <div className="flex gap-2">
-            <button className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-200"
-            >
-              ALL
-            </button>
-            <button className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-200"
-            
-            >
-              Pendding
-            </button>
-            <button
-              className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-200"
-            >
-              Confirmed
-            </button>
-            <button
-              
-              className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-200"
-            >
-              Cancelled
-            </button>
-        </div>
-      </div>
-
-      {/* TABLE */}
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-200 text-gray-600 text-sm">
+      <div className="bg-white rounded-xl shadow overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-300 text-sm text-gray-600">
             <tr>
               <th className="p-4">REF</th>
-              <th>CUSTOMER</th>
-              <th>TOUR</th>
-              <th>DATE</th>
-              <th>TOTAL</th>
-              <th>STATUS</th>
-              <th className="text-center">ACTIONS</th>
+              <th>Customer</th>
+              <th>Tour</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th className="text-center">Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {bookings.map((b) => (
-              <tr key={b.id} className="border-t hover:bg-gray-200">
-                {/* REF */}
-                <td className="p-4">
-                  <span className="bg-gray-200 px-2 py-1 rounded text-xs">
-                    {b.id}
-                  </span>
-                </td>
+            {filteredBookings.map((b) => (
+              <tr key={b.booking_id} className="border-t hover:bg-gray-200 text-center">
+                <td className="p-4">{b.booking_id}</td>
 
-                {/* CUSTOMER */}
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-teal-600 text-white flex items-center justify-center rounded-full">
-                      {b.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-medium">{b.name}</p>
-                      <p className="text-xs text-gray-500">{b.email}</p>
-                    </div>
-                  </div>
-                </td>
+                <td >{b.user_name}</td>
 
-                {/* TOUR */}
-                <td>{b.tour}</td>
+                <td >{b.tour_title}</td>
 
-                {/* DATE */}
-                <td>{b.date}</td>
+                <td >{b.booking_date}</td>
 
-                {/* TOTAL */}
-                <td className="font-semibold">{b.total}</td>
+                <td>${b.total_price}</td>
 
-                {/* STATUS */}
                 <td>
                   <span
-                    className={`px-3 py-1 text-sm rounded-full ${
-                      b.status === "Confirmed"
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      b.status === "approved"
                         ? "bg-green-100 text-green-600"
-                        : b.status === "Cancelled"
+                        : b.status === "rejected"
                         ? "bg-red-100 text-red-500"
-                        
                         : "bg-yellow-100 text-yellow-600"
                     }`}
                   >
@@ -134,15 +113,20 @@ const Bookings = () => {
                   </span>
                 </td>
 
-                {/* ACTIONS */}
                 <td className="text-center">
                   <div className="flex justify-center gap-2">
-                    <button className="bg-green-200 text-sm px-2 py-1 rounded hover:bg-green-500">
-                      <p>✔️</p>
-                    </button>
-                    <button className="bg-red-200 text-yellow-50 text-sm px-2 py-1 rounded hover:bg-red-500">
-                    <p>❌</p>
-                    </button>
+                    <button
+                        onClick={() => handleConfirm(b.booking_id)}
+                        className="bg-green-100 hover:bg-green-300 px-2 py-1 rounded">
+                        ✔
+                  </button>
+
+                  <button
+                    onClick={() => handleCancel(b.booking_id)}
+                    className="bg-red-100 hover:bg-red-300 px-2 py-1 rounded"
+                  >
+                    ✖
+                  </button>
                   </div>
                 </td>
               </tr>

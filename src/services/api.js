@@ -13,5 +13,12 @@ API.interceptors.request.use((req) => {
 
   return req;
 });
+export const getBookings = () => API.get("/bookings");
+
+export const approveBooking = (id) =>
+  API.put(`/bookings/${id}/approve`);
+
+export const rejectBooking = (id) =>
+  API.put(`/bookings/${id}/reject`);
 
 export default API;
