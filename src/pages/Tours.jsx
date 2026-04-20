@@ -29,7 +29,7 @@ const Tours = () => {
 };
 const createTour = async () => {
   try {
-    // ✅ VALIDATION
+    // VALIDATION
     if (
       !formData.title ||
       !formData.description ||
@@ -64,17 +64,19 @@ const createTour = async () => {
     showSuccess();
   } catch (error) {
     console.error(error);
+    toast.error("Something went wrong!");
   }
 };
 
     
-  // ✅ FETCH
+  // FETCH
   const fetchTours = async () => {
     try {
       const res = await API.get("/tours");
       setTours(res.data);
     } catch (error) {
       console.error(error);
+      toast.error("Database Disconnected!");
     }
   };
 const handleAdd = () => {
@@ -92,15 +94,7 @@ const handleAdd = () => {
 
   setShowModal(true);
 };
-  // ✅ DELETE
-//   const handleDelete = async (id) => {
-//   try {
-//     await API.delete(`/tours/${id}`);
-//     fetchTours(); // refresh UI
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
+
 const handleDelete = async (id) => {
   const confirmDelete = window.confirm("Are you sure you want to delete this tour?");
 
@@ -112,19 +106,10 @@ const handleDelete = async (id) => {
     deleteSuccess();
   } catch (error) {
     console.error(error);
+    toast.error("Something went wrong!");
   }
 };
 
-  // ✅ UPDATE
-  // const updateTour = async () => {
-  //   try {
-  //     await API.put(`/tours/${editingTour.id}`, editingTour);
-  //     setEditingTour(null);
-  //     fetchTours();
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 const handleEdit = (tour) => {
   setEditingTour(tour);
 
@@ -163,9 +148,10 @@ const handleEdit = (tour) => {
     updatSuccess();
   } catch (error) {
     console.error(error);
+    toast.error("Something went wrong!");
   }
 };
-  // ✅ LOAD DATA
+  //  LOAD DATA
   useEffect(() => {
     fetchTours();
   }, []);

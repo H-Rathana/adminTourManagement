@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/layouts/Layout";
-import {getBookings,approveBooking,rejectBooking} from "../services/api";
+import { getBookings, approveBooking, rejectBooking } from "../services/api";
 import toast from "react-hot-toast";
 
 
@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 const successApproved = () => {
   toast.success("Booking have been Confirm 🎉");
 };
- const successRejected = () => {
+const successRejected = () => {
   toast.success("Booking have been Rejected❌");
 };
 
@@ -16,10 +16,10 @@ const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const [filter, setFilter] = useState("all");
 
-const filteredBookings = bookings.filter((booking) => {
-  if (filter === "all") return true;
-  return booking.status === filter;
-});
+  const filteredBookings = bookings.filter((booking) => {
+    if (filter === "all") return true;
+    return booking.status === filter;
+  });
   // FETCH
   const fetchBookings = async () => {
     try {
@@ -27,41 +27,44 @@ const filteredBookings = bookings.filter((booking) => {
       setBookings(res.data);
     } catch (err) {
       console.error(err);
+      toast.error("Database Disconnected!");
     }
   };
 
   useEffect(() => {
-  fetchBookings( 
-
-  );
-}, []);
+    const loadBookings = async () => {
+      await fetchBookings();
+    };
+    loadBookings();
+  }, []);
 
   // ✅ CONFIRM
- const handleConfirm = async (id) => {
-  try {
-    await approveBooking(id);
-    fetchBookings();
-    successApproved();
-  } catch (err) {
-    console.log(err);
-    console.error(err);
+  const handleConfirm = async (id) => {
+    try {
+      await approveBooking(id);
+      fetchBookings();
+      successApproved();
+    } catch (err) {
+      console.log(err);
+      console.error(err);
+      toast.error("Something went wrong!");
+    }
+  };
 
-  }
-};
+  const handleCancel = async (id) => {
+    const confirmAction = window.confirm("Cancel this booking?");
+    if (!confirmAction) return;
 
-const handleCancel = async (id) => {
-  const confirmAction = window.confirm("Cancel this booking?");
-  if (!confirmAction) return;
-
-  try {
-    await rejectBooking(id);
-    fetchBookings();
-    successRejected();
-  } catch (err) {
-    console.log(err);
-    console.error(err);
-  }
-};
+    try {
+      await rejectBooking(id);
+      fetchBookings();
+      successRejected();
+    } catch (err) {
+      console.log(err);
+      console.error(err);
+      toast.error("Something went wrong!");
+    }
+  };
 
   return (
     <Layout>
@@ -101,13 +104,12 @@ const handleCancel = async (id) => {
 
                 <td>
                   <span
-                    className={`px-3 py-1 rounded-full text-sm ${
-                      b.status === "approved"
+                    className={`px-3 py-1 rounded-full text-sm ${b.status === "approved"
                         ? "bg-green-100 text-green-600"
                         : b.status === "rejected"
-                        ? "bg-red-100 text-red-500"
-                        : "bg-yellow-100 text-yellow-600"
-                    }`}
+                          ? "bg-red-100 text-red-500"
+                          : "bg-yellow-100 text-yellow-600"
+                      }`}
                   >
                     {b.status}
                   </span>
@@ -116,17 +118,17 @@ const handleCancel = async (id) => {
                 <td className="text-center">
                   <div className="flex justify-center gap-2">
                     <button
-                        onClick={() => handleConfirm(b.booking_id)}
-                        className="bg-green-100 hover:bg-green-300 px-2 py-1 rounded">
-                        ✔
-                  </button>
+                      onClick={() => handleConfirm(b.booking_id)}
+                      className="bg-green-100 hover:bg-green-300 px-2 py-1 rounded">
+                      ✔
+                    </button>
 
-                  <button
-                    onClick={() => handleCancel(b.booking_id)}
-                    className="bg-red-100 hover:bg-red-300 px-2 py-1 rounded"
-                  >
-                    ✖
-                  </button>
+                    <button
+                      onClick={() => handleCancel(b.booking_id)}
+                      className="bg-red-100 hover:bg-red-300 px-2 py-1 rounded"
+                    >
+                      ✖
+                    </button>
                   </div>
                 </td>
               </tr>

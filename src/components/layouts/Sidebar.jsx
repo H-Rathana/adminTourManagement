@@ -9,13 +9,14 @@ const Sidebar = () => {
         <nav className="flex flex-col gap-2 px-4">
           <Link to="/dashboard" className="p-2 rounded hover:bg-sky-700 ">
             📊Overview
-          </Link>
+          </Link>   
           <Link to="/bookings" className="p-2 rounded hover:bg-sky-700 ">
             📋Bookings
           </Link>
           <Link to="/tours" className="p-2 rounded hover:bg-sky-700 ">
             🗺️Tours
           </Link>     
+            
         </nav>
       </div>
 
