@@ -1,29 +1,28 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 import Layout from "../components/layouts/Layout";
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
+  const date = new Date();
+const year = date.getFullYear();
+const month =  date.toLocaleString('default', { month: 'long' });  // Months are 0-indexed
+const day = String(date.getDate()).padStart(2, '0');
 
-
+const formattedDate = `${day} ${month},${year}`;
   //Fetch States
-    useEffect(() => {
-
-    fetchStats();
-    }, []);
-
-  const fetchStats = async () => {
-    try {
-      const res = await API.get("/dashboard/stats");
-      setStats(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await API.get("/dashboard/stats");
+        setStats(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchData();
+  }, []);
 
   if (!stats) return <div className="animate-pulse h-20 bg-gray-200 rounded-xl text-center">Loading dashboard...</div>;
 
@@ -31,25 +30,33 @@ const Dashboard = () => {
     name: item.status,
     value: parseInt(item.count)
   }));
-
+  
   return (
-    <Layout>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-        
+    <div>
+
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold font-serif ">Dashboard Overview</h1>
+          <p className="rounded-xl p-2 shadow text-gray-500 font-mono">📅 {formattedDate}</p>
+      </div>
+      <p className="text-gray-600 mb-6">Welcome back here what's happening</p>
       {/* 🔢 Stats Cards */}
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-4 gap-6 mb-6 ">
         <div className="bg-white p-5 rounded-xl shadow">
-          <p>Total Bookings</p>
+          <p>📋TOTAL BOOKING</p>
           <h2 className="text-2xl font-bold">{stats.totalBookings}</h2>
         </div>
         <div className="bg-white p-5 rounded-xl shadow">
-          <p>Total Tour</p>
+          <p>🗺️ACTIVE TOURS</p>
           <h2 className="text-2xl font-bold">{stats.totalTour}</h2>
         </div>
-        
+
 
         <div className="bg-white p-5 rounded-xl shadow">
-          <p>Total Revenue</p>
+          <p>💰TOTAL REVENUE</p>
+          <h2 className="text-2xl font-bold">${stats.totalRevenue}</h2>
+        </div>
+        <div className="bg-white p-5 rounded-xl shadow">
+          <p>⭐AVG RATING</p>
           <h2 className="text-2xl font-bold">${stats.totalRevenue}</h2>
         </div>
       </div>
@@ -61,7 +68,7 @@ const Dashboard = () => {
           <h3 className="mb-4 font-semibold">Booking Status</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={pieData}
-            fill="#8884d8"
+              fill="#B85E09"
             >
               <XAxis dataKey="name" />
               <YAxis />
@@ -82,9 +89,13 @@ const Dashboard = () => {
                 nameKey="name"
                 outerRadius={100}
                 label
+                cx="50%"
+                cy="50%"
+                fill="#CDB885"
               >
                 {pieData.map((entry, index) => (
-                  <Cell key={index} 
+                  <Cell key={index}
+                  
                   />
                 ))}
               </Pie>
@@ -94,7 +105,8 @@ const Dashboard = () => {
         </div>
 
       </div>
-    </Layout>
+      
+    </div>
   );
 };
 

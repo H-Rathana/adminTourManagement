@@ -67,8 +67,9 @@ const Bookings = () => {
   };
 
   return (
-    <Layout>
-      <h1 className="text-2xl font-bold mb-4">Bookings</h1>
+    <div>
+      <h1 className="text-3xl font-bold font-serif">Bookings</h1>
+      
       <div className="flex gap-10 justify-end p-5">
         <button onClick={() => setFilter("all")} className="btn  ">All</button>
         <button onClick={() => setFilter("approved")} className="btn">Approved</button>
@@ -136,7 +137,7 @@ const Bookings = () => {
           </tbody>
         </table>
       </div>
-    </Layout>
+    </div>
   );
 };
 

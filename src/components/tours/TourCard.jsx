@@ -13,13 +13,13 @@ const TourCard = ({ tour, onDelete, onEdit }) => {
       <p><span>👥{tour.max_people}</span>💲{tour.price}</p>
 
       <div className="flex gap-2 mt-3">
-        <button onClick={() => onEdit(tour)} className="bg-sky-500 text-white px-3 py-1 rounded">
+        <button onClick={() => onEdit(tour)} className="border-2 border-blue-600 px-3 py-1 rounded-xl text-blue-600">
            Edit
         </button>
 
         <button
           onClick={() => onDelete(tour.tour_id)}
-          className="bg-red-500 text-white px-3 py-1 rounded"
+          className="border-2 border-red-600  px-3 py-1 rounded-xl text-red-600"
         >
           Delete
         </button>

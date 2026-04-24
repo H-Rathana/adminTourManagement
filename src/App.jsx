@@ -7,10 +7,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />} />
-        <Route path="/dashboard" element={<Dashboard/>}/>
-        <Route path="/tours" element={<Tours />} />
-        <Route path="/bookings" element={<Bookings />} />
+         <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="tours" element={<Tours />} />
+          <Route path="bookings" element={<Bookings />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

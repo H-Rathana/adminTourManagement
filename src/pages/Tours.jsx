@@ -157,14 +157,15 @@ const handleEdit = (tour) => {
   }, []);
 
   return (
-    <Layout>
+    <div>
       
-      <div className="pb-5 flex justify-end"> 
-         <button className="bg-orange-500 text-white px-4 py-2 rounded-lg mr-5" onClick={handleAdd}>
+      <div className="flex justify-between"> 
+        <h1 className="text-3xl font-bold font-serif">Tour Packages</h1>
+         <button className="bg-red-500 text-white px-4 py-2 rounded-xl mr-5" onClick={handleAdd}>
         + Add Tour
       </button>
-      <div></div>
       </div>
+      <p className="text-gray-600 mb-6">Manage your offering</p>
       <div className="grid grid-cols-3 gap-6">
         {/* Tour List */}
         {tours.map((tour) => (
@@ -189,7 +190,7 @@ const handleEdit = (tour) => {
         />
       )}
       </div>
-    </Layout>
+    </div>
   );
 };
 
