@@ -71,10 +71,10 @@ const Bookings = () => {
       <h1 className="text-3xl font-bold font-serif">Bookings</h1>
       
       <div className="flex gap-10 justify-end p-5">
-        <button onClick={() => setFilter("all")} className="btn  ">All</button>
-        <button onClick={() => setFilter("approved")} className="btn">Approved</button>
-        <button onClick={() => setFilter("pending")} className="btn">Pending</button>
-        <button onClick={() => setFilter("rejected")} className="btn">Rejected</button>
+        <button onClick={() => setFilter("all")} className="btn hover:text-blue-400 ">All</button>
+        <button onClick={() => setFilter("approved")} className="btn hover:text-green-400">Approved</button>
+        <button onClick={() => setFilter("Pending")} className="btn hover:text-yellow-400">Pending</button>
+        <button onClick={() => setFilter("rejected")} className="btn hover:text-red-400">Rejected</button>
       </div>
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full">
@@ -83,9 +83,13 @@ const Bookings = () => {
               <th className="p-4">REF</th>
               <th>Customer</th>
               <th>Tour</th>
-              <th>Date</th>
+              <th>Booking Date</th>
+              <th>Phone</th>
+              <th>Travel Date</th>
               <th>Total</th>
               <th>Status</th>
+              <th>Payment Status</th>
+              <th>View</th>
               <th className="text-center">Actions</th>
             </tr>
           </thead>
@@ -95,11 +99,30 @@ const Bookings = () => {
               <tr key={b.booking_id} className="border-t hover:bg-gray-200 text-center">
                 <td className="p-4">{b.booking_id}</td>
 
-                <td >{b.user_name}</td>
+                <td >{b.full_name}</td>
 
                 <td >{b.tour_title}</td>
 
-                <td >{b.booking_date}</td>
+                <td >{new Date(b.booking_date).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}</td>
+
+                <td>{b.phone}</td>
+
+                <td >{new Date(b.travel_date).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      }
+                    )}
+                </td>
 
                 <td>${b.total_price}</td>
 
@@ -115,7 +138,21 @@ const Bookings = () => {
                     {b.status}
                   </span>
                 </td>
-
+                <td>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${b.payment_status === "paid"
+                        ? "bg-green-100 text-green-600"
+                        : b.payment_status === "failed"
+                          ? "bg-red-100 text-red-500"
+                          : "bg-yellow-100 text-yellow-600"
+                      }`}
+                  >
+                    {b.payment_status}
+                  </span>
+                </td>
+                <td className="text-center">
+                      eye
+                  </td>    
                 <td className="text-center">
                   <div className="flex justify-center gap-2">
                     <button

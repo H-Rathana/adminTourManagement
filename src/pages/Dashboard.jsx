@@ -7,7 +7,7 @@ const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const date = new Date();
 const year = date.getFullYear();
-const month =  date.toLocaleString('default', { month: 'long' });  // Months are 0-indexed
+const month =  date.toLocaleString('default', { month: 'long' });  
 const day = String(date.getDate()).padStart(2, '0');
 
 const formattedDate = `${day} ${month},${year}`;
@@ -29,6 +29,7 @@ const formattedDate = `${day} ${month},${year}`;
   const pieData = stats.statusStats.map((item) => ({
     name: item.status,
     value: parseInt(item.count)
+    
   }));
   
   return (
