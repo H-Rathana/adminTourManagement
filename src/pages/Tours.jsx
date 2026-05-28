@@ -170,7 +170,7 @@ const handleEdit = (tour) => {
         {/* Tour List */}
         {tours.map((tour) => (
           <TourCard
-            key={tour.id}
+            key={tour.tour_id}
             tour={tour}
             onEdit={handleEdit}
             onDelete={handleDelete}

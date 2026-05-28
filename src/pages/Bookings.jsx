@@ -1,181 +1,643 @@
 import { useEffect, useState } from "react";
-import Layout from "../components/layouts/Layout";
-import { getBookings, approveBooking, rejectBooking } from "../services/api";
+import {
+  getBookings,
+  approveBooking,
+  rejectBooking,
+} from "../services/api";
+
 import toast from "react-hot-toast";
 
-
+import {
+  Check,
+  X,
+  Eye,
+  Search,
+  CalendarDays,
+  CircleDollarSign,
+  Clock3,
+  BadgeCheck,
+} from "lucide-react";
 
 const successApproved = () => {
-  toast.success("Booking have been Confirm 🎉");
+  toast.success(
+    "Booking has been confirmed 🎉"
+  );
 };
+
 const successRejected = () => {
-  toast.success("Booking have been Rejected❌");
+  toast.success(
+    "Booking has been rejected ❌"
+  );
 };
 
 const Bookings = () => {
-  const [bookings, setBookings] = useState([]);
-  const [filter, setFilter] = useState("all");
 
-  const filteredBookings = bookings.filter((booking) => {
-    if (filter === "all") return true;
-    return booking.status === filter;
-  });
-  // FETCH
-  const fetchBookings = async () => {
-    try {
-      const res = await getBookings();
-      setBookings(res.data);
-    } catch (err) {
-      console.error(err);
-      toast.error("Database Disconnected!");
-    }
-  };
+  const [bookings, setBookings] =
+    useState([]);
+
+  const [filter, setFilter] =
+    useState("all");
+
+  const [search, setSearch] =
+    useState("");
+
+  // ✅ FILTER + SEARCH
+  const filteredBookings =
+    bookings.filter((booking) => {
+
+      const matchesFilter =
+        filter === "all"
+          ? true
+          : booking.status ===
+          filter;
+
+      const matchesSearch =
+
+        booking.full_name
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+
+        booking.tour_title
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+
+        booking.phone?.includes(
+          search
+        );
+
+      return (
+        matchesFilter &&
+        matchesSearch
+      );
+
+    });
+
+  // ✅ FETCH BOOKINGS
+  const fetchBookings =
+    async () => {
+
+      try {
+
+        const res =
+          await getBookings();
+
+        setBookings(res.data);
+
+      } catch (err) {
+
+        console.error(err);
+
+        toast.error(
+          "Database disconnected!"
+        );
+
+      }
+
+    };
 
   useEffect(() => {
+
     const loadBookings = async () => {
       await fetchBookings();
     };
+
     loadBookings();
+
   }, []);
 
-  // ✅ CONFIRM
-  const handleConfirm = async (id) => {
-    try {
-      await approveBooking(id);
-      fetchBookings();
-      successApproved();
-    } catch (err) {
-      console.log(err);
-      console.error(err);
-      toast.error("Something went wrong!");
-    }
-  };
+  // ✅ APPROVE
+  const handleConfirm =
+    async (id) => {
 
-  const handleCancel = async (id) => {
-    const confirmAction = window.confirm("Cancel this booking?");
-    if (!confirmAction) return;
+      try {
 
-    try {
-      await rejectBooking(id);
-      fetchBookings();
-      successRejected();
-    } catch (err) {
-      console.log(err);
-      console.error(err);
-      toast.error("Something went wrong!");
-    }
-  };
+        await approveBooking(id);
+
+        fetchBookings();
+
+        successApproved();
+
+      } catch (err) {
+
+        console.error(err);
+
+        toast.error(
+          "Something went wrong!"
+        );
+
+      }
+
+    };
+
+  // ✅ REJECT
+  const handleCancel =
+    async (id) => {
+
+      const confirmAction =
+        window.confirm(
+          "Reject this booking?"
+        );
+
+      if (!confirmAction)
+        return;
+
+      try {
+
+        await rejectBooking(id);
+
+        fetchBookings();
+
+        successRejected();
+
+      } catch (err) {
+
+        console.error(err);
+
+        toast.error(
+          "Something went wrong!"
+        );
+
+      }
+
+    };
+
+  // ✅ REVENUE
+  const totalRevenue =
+    bookings
+      .filter(
+        (b) =>
+          b.payment_status ===
+          "paid"
+      )
+      .reduce(
+        (sum, b) =>
+          sum +
+          Number(
+            b.total_price
+          ),
+        0
+      );
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold font-serif">Bookings</h1>
-      
-      <div className="flex gap-10 justify-end p-5">
-        <button onClick={() => setFilter("all")} className="btn hover:text-blue-400 ">All</button>
-        <button onClick={() => setFilter("approved")} className="btn hover:text-green-400">Approved</button>
-        <button onClick={() => setFilter("Pending")} className="btn hover:text-yellow-400">Pending</button>
-        <button onClick={() => setFilter("rejected")} className="btn hover:text-red-400">Rejected</button>
+
+    <div className="space-y-6">
+
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+
+        <div>
+
+          <h1 className="text-3xl font-bold text-slate-800">
+            Bookings
+          </h1>
+
+          <p className="text-gray-500 mt-1">
+            Manage customer bookings
+          </p>
+
+        </div>
+
+        {/* SEARCH */}
+        <div className="relative w-full md:w-80">
+
+          <Search
+            className="absolute left-3 top-3 text-gray-400"
+            size={18}
+          />
+
+          <input
+            type="text"
+            placeholder="Search bookings..."
+            value={search}
+            onChange={(e) =>
+              setSearch(
+                e.target.value
+              )
+            }
+            className="w-full pl-10 pr-4 py-3 rounded-xl border bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+          />
+
+        </div>
+
       </div>
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-300 text-sm text-gray-600">
-            <tr>
-              <th className="p-4">REF</th>
-              <th>Customer</th>
-              <th>Tour</th>
-              <th>Booking Date</th>
-              <th>Phone</th>
-              <th>Travel Date</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Payment Status</th>
-              <th>View</th>
-              <th className="text-center">Actions</th>
-            </tr>
-          </thead>
 
-          <tbody>
-            {filteredBookings.map((b) => (
-              <tr key={b.booking_id} className="border-t hover:bg-gray-200 text-center">
-                <td className="p-4">{b.booking_id}</td>
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-                <td >{b.full_name}</td>
+        {/* TOTAL */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
 
-                <td >{b.tour_title}</td>
+          <div className="flex items-center justify-between">
 
-                <td >{new Date(b.booking_date).toLocaleDateString(
-                      "en-GB",
-                      {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      }
-                    )}</td>
+            <div>
 
-                <td>{b.phone}</td>
+              <p className="text-gray-500 text-sm">
+                Total Bookings
+              </p>
 
-                <td >{new Date(b.travel_date).toLocaleDateString(
-                      "en-GB",
-                      {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      }
-                    )}
-                </td>
+              <h2 className="text-3xl font-bold mt-1">
+                {
+                  bookings.length
+                }
+              </h2>
 
-                <td>${b.total_price}</td>
+            </div>
 
-                <td>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${b.status === "approved"
-                        ? "bg-green-100 text-green-600"
-                        : b.status === "rejected"
-                          ? "bg-red-100 text-red-500"
-                          : "bg-yellow-100 text-yellow-600"
-                      }`}
-                  >
-                    {b.status}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm ${b.payment_status === "paid"
-                        ? "bg-green-100 text-green-600"
-                        : b.payment_status === "failed"
-                          ? "bg-red-100 text-red-500"
-                          : "bg-yellow-100 text-yellow-600"
-                      }`}
-                  >
-                    {b.payment_status}
-                  </span>
-                </td>
-                <td className="text-center">
-                      eye
-                  </td>    
-                <td className="text-center">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleConfirm(b.booking_id)}
-                      className="bg-green-100 hover:bg-green-300 px-2 py-1 rounded">
-                      ✔
-                    </button>
+            <CalendarDays
+              className="text-sky-500"
+            />
 
-                    <button
-                      onClick={() => handleCancel(b.booking_id)}
-                      className="bg-red-100 hover:bg-red-300 px-2 py-1 rounded"
-                    >
-                      ✖
-                    </button>
-                  </div>
-                </td>
+          </div>
+
+        </div>
+
+        {/* APPROVED */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <p className="text-gray-500 text-sm">
+                Approved
+              </p>
+
+              <h2 className="text-3xl font-bold mt-1">
+
+                {
+                  bookings.filter(
+                    (b) =>
+                      b.status ===
+                      "approved"
+                  ).length
+                }
+
+              </h2>
+
+            </div>
+
+            <BadgeCheck
+              className="text-green-500"
+            />
+
+          </div>
+
+        </div>
+
+        {/* PENDING */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <p className="text-gray-500 text-sm">
+                Pending
+              </p>
+
+              <h2 className="text-3xl font-bold mt-1">
+
+                {
+                  bookings.filter(
+                    (b) =>
+                      b.status ===
+                      "Pending"
+                  ).length
+                }
+
+              </h2>
+
+            </div>
+
+            <Clock3
+              className="text-yellow-500"
+            />
+
+          </div>
+
+        </div>
+
+        {/* REVENUE */}
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <p className="text-gray-500 text-sm">
+                Revenue
+              </p>
+
+              <h2 className="text-3xl font-bold mt-1">
+                $
+                {totalRevenue}
+              </h2>
+
+            </div>
+
+            <CircleDollarSign
+              className="text-emerald-500"
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* FILTERS */}
+      <div className="flex gap-3 flex-wrap">
+
+        {[
+          "all",
+          "approved",
+          "Pending",
+          "rejected",
+        ].map((item) => (
+
+          <button
+            key={item}
+            onClick={() =>
+              setFilter(item)
+            }
+            className={`px-5 py-2 rounded-full transition font-medium capitalize
+
+            ${filter === item
+
+                ? "bg-sky-500 text-white shadow"
+
+                : "bg-white hover:bg-slate-100 text-gray-600"
+              }`}
+          >
+
+            {item}
+
+          </button>
+
+        ))}
+
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
+
+        <div className="overflow-x-auto">
+
+          <table className="w-full">
+
+            {/* HEAD */}
+            <thead className="bg-slate-100 text-slate-600 text-sm">
+
+              <tr>
+
+                <th className="p-4 text-left">
+                  REF
+                </th>
+
+                <th className="text-left">
+                  Customer
+                </th>
+
+                <th className="text-left">
+                  Tour
+                </th>
+
+                <th className="text-left">
+                  Booking Date
+                </th>
+
+                <th className="text-left">
+                  Phone
+                </th>
+
+                <th className="text-left">
+                  Travel Date
+                </th>
+
+                <th className="text-left">
+                  Total
+                </th>
+
+                <th className="text-center">
+                  Status
+                </th>
+
+                <th className="text-center">
+                  Payment
+                </th>
+
+                <th className="text-center">
+                  View
+                </th>
+
+                <th className="text-center">
+                  Actions
+                </th>
+
               </tr>
-            ))}
-          </tbody>
-        </table>
+
+            </thead>
+
+            {/* BODY */}
+            <tbody>
+
+              {filteredBookings.map(
+                (b) => (
+
+                  <tr
+                    key={b.booking_id}
+                    className="border-t hover:bg-slate-50 transition"
+                  >
+
+                    <td className="p-4 font-semibold text-slate-700">
+                      #
+                      {b.booking_id}
+                    </td>
+
+                    <td className="font-medium">
+                      {
+                        b.full_name
+                      }
+                    </td>
+
+                    <td>
+                      {
+                        b.tour_title
+                      }
+                    </td>
+
+                    <td>
+
+                      {new Date(
+                        b.booking_date
+                      ).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+
+                    </td>
+
+                    <td>
+                      {b.phone}
+                    </td>
+
+                    <td>
+
+                      {new Date(
+                        b.travel_date
+                      ).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+
+                    </td>
+
+                    <td className="font-semibold">
+                      $
+                      {
+                        b.total_price
+                      }
+                    </td>
+
+                    {/* STATUS */}
+                    <td className="text-center">
+
+                      <span
+                        className={`px-4 py-1 rounded-full text-sm font-medium
+
+                        ${b.status ===
+                            "approved"
+
+                            ? "bg-green-100 text-green-600"
+
+                            : b.status ===
+                              "rejected"
+
+                              ? "bg-red-100 text-red-500"
+
+                              : "bg-yellow-100 text-yellow-600"
+                          }`}
+                      >
+
+                        {b.status}
+
+                      </span>
+
+                    </td>
+
+                    {/* PAYMENT */}
+                    <td className="text-center">
+
+                      <span
+                        className={`px-4 py-1 rounded-full text-sm font-medium
+
+                        ${b.payment_status ===
+                            "paid"
+
+                            ? "bg-green-100 text-green-600"
+
+                            : b.payment_status ===
+                              "failed"
+
+                              ? "bg-red-100 text-red-500"
+
+                              : "bg-yellow-100 text-yellow-600"
+                          }`}
+                      >
+
+                        {
+                          b.payment_status
+                        }
+
+                      </span>
+
+                    </td>
+
+                    {/* VIEW */}
+                    <td className="text-center">
+
+                      <button
+                        className="hover:text-sky-500 transition"
+                      >
+
+                        <Eye
+                          size={18}
+                        />
+
+                      </button>
+
+                    </td>
+
+                    {/* ACTIONS */}
+                    <td>
+
+                      <div className="flex justify-center gap-2">
+
+                        {/* APPROVE */}
+                        <button
+                          onClick={() =>
+                            handleConfirm(
+                              b.booking_id
+                            )
+                          }
+                          className="bg-green-100 hover:bg-green-200 text-green-600 p-2 rounded-lg transition"
+                        >
+
+                          <Check
+                            size={18}
+                          />
+
+                        </button>
+
+                        {/* REJECT */}
+                        <button
+                          onClick={() =>
+                            handleCancel(
+                              b.booking_id
+                            )
+                          }
+                          className="bg-red-100 hover:bg-red-200 text-red-500 p-2 rounded-lg transition"
+                        >
+
+                          <X
+                            size={18}
+                          />
+
+                        </button>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                )
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
       </div>
+
     </div>
+
   );
+
 };
 
 export default Bookings;
