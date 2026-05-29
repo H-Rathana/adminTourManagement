@@ -7,6 +7,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminRoute from "./components/AdminRoute";
 import Payments from "./pages/Payments";
 import UsersPage from "./pages/Users";
+import Reports from "./pages/Reports";
 function App() {
   return (
     <BrowserRouter>
@@ -49,6 +50,10 @@ function App() {
           <Route
             path="users"
             element={<UsersPage />}
+          />
+          <Route
+            path="reports"
+            element={<Reports />}
           />
         </Route>
       </Routes>

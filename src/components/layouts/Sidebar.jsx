@@ -10,6 +10,7 @@ import {
   CreditCard,
   LogOut,
   Users,
+  FileBarChart,
   UserCircle2,
 } from "lucide-react";
 
@@ -151,6 +152,20 @@ const Sidebar = () => {
             Users
           </span>
 
+      </NavLink>
+      <NavLink
+        to="/reports"
+        className={({ isActive }) =>
+          `flex items-center gap-3 p-3 rounded-xl transition
+          ${
+            isActive
+              ? "bg-sky-700 text-white"
+              : "hover:bg-slate-800"
+          }`
+        }
+      >
+        <FileBarChart size={20} />
+        Reports
       </NavLink>
         </nav>
 

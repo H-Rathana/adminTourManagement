@@ -111,10 +111,11 @@ const Dashboard = () => {
 
   // ✅ COLORS
   const COLORS = [
-    "#0ea5e9",
     "#22c55e",
-    "#f59e0b",
     "#ef4444",
+    "#0ea5e9",
+    "#f59e0b",
+    
   ];
   
   return (
@@ -640,18 +641,13 @@ const Dashboard = () => {
                         text-sm
                         font-medium
 
-                        ${
-                          booking.status ===
-                          "approved"
-
-                          ? "bg-green-100 text-green-700"
-
-                          : booking.status ===
-                            "Pending"
-
-                          ? "bg-yellow-100 text-yellow-700"
-
-                          : "bg-red-100 text-red-700"
+                        ${booking.status === "approved"
+                        ? "bg-green-100 text-green-600"
+                        : booking.status === "Pending"
+                        ? "bg-yellow-100 text-yellow-600"
+                        : booking.status === "rejected"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-blue-100 text-blue-600"
                         }
                       `}
                     >

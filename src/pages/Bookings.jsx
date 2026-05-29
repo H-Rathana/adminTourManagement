@@ -6,7 +6,7 @@ import {
 } from "../services/api";
 
 import toast from "react-hot-toast";
-
+import BookingDetailsModal from "../components/bookings/BookingDetailsModal";
 import {
   Check,
   X,
@@ -15,6 +15,7 @@ import {
   CalendarDays,
   CircleDollarSign,
   Clock3,
+  Badge,
   BadgeCheck,
 } from "lucide-react";
 
@@ -40,6 +41,9 @@ const Bookings = () => {
 
   const [search, setSearch] =
     useState("");
+
+  const [selectedBooking,setSelectedBooking] =
+  useState(null);
 
   // ✅ FILTER + SEARCH
   const filteredBookings =
@@ -226,7 +230,7 @@ const Bookings = () => {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 
         {/* TOTAL */}
         <div className="bg-white rounded-2xl shadow-sm p-5">
@@ -248,7 +252,7 @@ const Bookings = () => {
             </div>
 
             <CalendarDays
-              className="text-sky-500"
+              className="text-orange-500"
             />
 
           </div>
@@ -320,6 +324,37 @@ const Bookings = () => {
           </div>
 
         </div>
+        <div className="bg-white rounded-2xl shadow-sm p-5">
+
+          <div className="flex items-center justify-between">
+
+            <div>
+
+              <p className="text-gray-500 text-sm">
+                Complete
+              </p>
+
+              <h2 className="text-3xl font-bold mt-1">
+
+                {
+                  bookings.filter(
+                    (b) =>
+                      b.status ===
+                      "completed"
+                  ).length
+                }
+
+              </h2>
+
+            </div>
+
+            <Badge 
+              className="text-sky-500"
+            />
+
+          </div>
+
+        </div>
 
         {/* REVENUE */}
         <div className="bg-white rounded-2xl shadow-sm p-5">
@@ -340,7 +375,7 @@ const Bookings = () => {
             </div>
 
             <CircleDollarSign
-              className="text-emerald-500"
+              className="text-emerald-700"
             />
 
           </div>
@@ -357,6 +392,7 @@ const Bookings = () => {
           "approved",
           "Pending",
           "rejected",
+          "completed"
         ].map((item) => (
 
           <button
@@ -517,18 +553,15 @@ const Bookings = () => {
                       <span
                         className={`px-4 py-1 rounded-full text-sm font-medium
 
-                        ${b.status ===
-                            "approved"
-
-                            ? "bg-green-100 text-green-600"
-
-                            : b.status ===
-                              "rejected"
-
-                              ? "bg-red-100 text-red-500"
-
-                              : "bg-yellow-100 text-yellow-600"
-                          }`}
+                        ${b.status === "approved"
+                        ? "bg-green-100 text-green-600"
+                        : b.status === "Pending"
+                        ? "bg-yellow-100 text-yellow-600"
+                        : b.status === "rejected"
+                        ? "bg-red-100 text-red-600"
+                        : "bg-blue-100 text-blue-600"
+                        }
+                        `}
                       >
 
                         {b.status}
@@ -570,6 +603,9 @@ const Bookings = () => {
 
                       <button
                         className="hover:text-sky-500 transition"
+                        onClick={() =>
+                          setSelectedBooking(b)
+                        }
                       >
 
                         <Eye
@@ -581,45 +617,68 @@ const Bookings = () => {
                     </td>
 
                     {/* ACTIONS */}
-                    <td>
+                    <td className="text-center">
+
+                    {!["completed", "rejected"].includes(b.status) ? (
 
                       <div className="flex justify-center gap-2">
 
-                        {/* APPROVE */}
                         <button
                           onClick={() =>
-                            handleConfirm(
-                              b.booking_id
-                            )
+                            handleConfirm(b.booking_id)
                           }
-                          className="bg-green-100 hover:bg-green-200 text-green-600 p-2 rounded-lg transition"
+                          className="
+                          bg-green-100
+                          text-green-600
+                          p-2
+                          rounded-lg
+                          hover:bg-green-200
+                          transition
+                          "
                         >
-
-                          <Check
-                            size={18}
-                          />
-
+                          <Check size={18} />
                         </button>
 
-                        {/* REJECT */}
                         <button
                           onClick={() =>
-                            handleCancel(
-                              b.booking_id
-                            )
+                            handleCancel(b.booking_id)
                           }
-                          className="bg-red-100 hover:bg-red-200 text-red-500 p-2 rounded-lg transition"
+                          className="
+                          bg-red-100
+                          text-red-600
+                          p-2
+                          rounded-lg
+                          hover:bg-red-200
+                          transition
+                          "
                         >
-
-                          <X
-                            size={18}
-                          />
-
+                          <X size={18} />
                         </button>
 
                       </div>
 
-                    </td>
+                    ) : (
+
+                      <span
+                        className={`
+                        text-sm
+                        font-semibold
+
+                        ${
+                          b.status === "completed"
+                            ? "text-blue-600"
+                            : "text-red-500"
+                        }
+                        `}
+                      >
+                        {b.status === "completed"
+                          ? "Tour Finished"
+                          : "Booking Rejected"}
+                      </span>
+
+                    )}
+
+                  </td>
 
                   </tr>
 
@@ -631,9 +690,19 @@ const Bookings = () => {
           </table>
 
         </div>
-
       </div>
+                      {
+        selectedBooking && (
 
+        <BookingDetailsModal
+          booking={selectedBooking}
+          onClose={() =>
+            setSelectedBooking(null)
+          }
+        />
+
+        )
+        }
     </div>
 
   );
