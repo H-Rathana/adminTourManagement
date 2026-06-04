@@ -368,8 +368,7 @@ const Bookings = () => {
               </p>
 
               <h2 className="text-3xl font-bold mt-1">
-                $
-                {totalRevenue}
+                 ${Number(totalRevenue).toLocaleString()}
               </h2>
 
             </div>
@@ -619,66 +618,72 @@ const Bookings = () => {
                     {/* ACTIONS */}
                     <td className="text-center">
 
-                    {!["completed", "rejected"].includes(b.status) ? (
+                      {b.status === "Pending" ? (
 
-                      <div className="flex justify-center gap-2">
+                        <div className="flex justify-center gap-2">
 
-                        <button
-                          onClick={() =>
-                            handleConfirm(b.booking_id)
+                          <button
+                            onClick={() =>
+                              handleConfirm(b.booking_id)
+                            }
+                            className="
+                            bg-green-100
+                            text-green-600
+                            p-2
+                            rounded-lg
+                            hover:bg-green-200
+                            transition
+                            "
+                          >
+                            <Check size={18} />
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleCancel(b.booking_id)
+                            }
+                            className="
+                            bg-red-100
+                            text-red-600
+                            p-2
+                            rounded-lg
+                            hover:bg-red-200
+                            transition
+                            "
+                          >
+                            <X size={18} />
+                          </button>
+
+                        </div>
+
+                      ) : (
+
+                        <span
+                          className={`
+                          text-sm
+                          font-semibold
+
+                          ${
+                            b.status === "approved"
+                              ? "text-green-600"
+                              : b.status === "completed"
+                              ? "text-blue-600"
+                              : "text-red-500"
                           }
-                          className="
-                          bg-green-100
-                          text-green-600
-                          p-2
-                          rounded-lg
-                          hover:bg-green-200
-                          transition
-                          "
+                          `}
                         >
-                          <Check size={18} />
-                        </button>
 
-                        <button
-                          onClick={() =>
-                            handleCancel(b.booking_id)
-                          }
-                          className="
-                          bg-red-100
-                          text-red-600
-                          p-2
-                          rounded-lg
-                          hover:bg-red-200
-                          transition
-                          "
-                        >
-                          <X size={18} />
-                        </button>
+                          {b.status === "approved"
+                            ? "Approved"
+                            : b.status === "completed"
+                            ? "Tour Finished"
+                            : "Booking Rejected"}
 
-                      </div>
+                        </span>
 
-                    ) : (
+                      )}
 
-                      <span
-                        className={`
-                        text-sm
-                        font-semibold
-
-                        ${
-                          b.status === "completed"
-                            ? "text-blue-600"
-                            : "text-red-500"
-                        }
-                        `}
-                      >
-                        {b.status === "completed"
-                          ? "Tour Finished"
-                          : "Booking Rejected"}
-                      </span>
-
-                    )}
-
-                  </td>
+                    </td>
 
                   </tr>
 

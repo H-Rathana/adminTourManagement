@@ -103,7 +103,7 @@ const AddTourModal = ({
 
               <input
                 type="text"
-                placeholder="Kampot"
+                placeholder="location"
                 value={formData.location}
                 onChange={(e) =>
                   setFormData({
@@ -124,7 +124,7 @@ const AddTourModal = ({
 
               <input
                 type="number"
-                placeholder="100"
+                placeholder="$"
                 value={formData.price}
                 onChange={(e) =>
                   setFormData({
@@ -150,7 +150,7 @@ const AddTourModal = ({
 
               <input
                 type="number"
-                placeholder="3"
+                placeholder="00"
                 value={formData.duration}
                 onChange={(e) =>
                   setFormData({
@@ -171,7 +171,7 @@ const AddTourModal = ({
 
               <input
                 type="number"
-                placeholder="20"
+                placeholder="1"
                 value={formData.max_people}
                 onChange={(e) =>
                   setFormData({

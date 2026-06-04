@@ -19,6 +19,7 @@ import {
   Map,
   Wallet,
   Star,
+  ScanLine
 } from "lucide-react";
 
 const Dashboard = () => {
@@ -275,14 +276,14 @@ const Dashboard = () => {
             </div>
 
             <div className="
-              bg-emerald-100
+              bg-orange-100
               p-4
               rounded-2xl
             ">
 
               <Map
                 className="
-                  text-emerald-600
+                  text-orange-600
                 "
               />
 
@@ -292,6 +293,58 @@ const Dashboard = () => {
 
         </div>
 
+        {/* RATING */}
+        <div className="
+          bg-white
+          p-6
+          rounded-2xl
+          shadow-sm
+          border
+          hover:shadow-md
+          transition
+        ">
+
+          <div className="
+            flex
+            justify-between
+            items-center
+          ">
+
+            <div>
+
+              <p className="
+                text-gray-500
+                text-sm
+              ">
+                Checked In
+              </p>
+
+              <h2 className="
+                text-3xl
+                font-bold
+                mt-2
+              ">
+                 {stats.checkedIn}
+              </h2>
+
+            </div>
+
+            <div className="
+              bg-green-100
+              p-4
+              rounded-2xl
+            ">
+
+             <ScanLine
+                
+                className="text-green-500"
+              />
+
+            </div>
+
+          </div>
+
+        </div>
         {/* REVENUE */}
         <div className="
           bg-white
@@ -337,60 +390,6 @@ const Dashboard = () => {
               <Wallet
                 className="
                   text-yellow-600
-                "
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* RATING */}
-        <div className="
-          bg-white
-          p-6
-          rounded-2xl
-          shadow-sm
-          border
-          hover:shadow-md
-          transition
-        ">
-
-          <div className="
-            flex
-            justify-between
-            items-center
-          ">
-
-            <div>
-
-              <p className="
-                text-gray-500
-                text-sm
-              ">
-                Avg Rating
-              </p>
-
-              <h2 className="
-                text-3xl
-                font-bold
-                mt-2
-              ">
-                4.8
-              </h2>
-
-            </div>
-
-            <div className="
-              bg-pink-100
-              p-4
-              rounded-2xl
-            ">
-
-              <Star
-                className="
-                  text-pink-600
                 "
               />
 

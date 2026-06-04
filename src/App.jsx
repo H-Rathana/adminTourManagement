@@ -8,6 +8,9 @@ import AdminRoute from "./components/AdminRoute";
 import Payments from "./pages/Payments";
 import UsersPage from "./pages/Users";
 import Reports from "./pages/Reports";
+import CheckInScanner from "./pages/CheckInScanner";
+import CheckInHistory from "./pages/CheckInHistory";
+
 function App() {
   return (
     <BrowserRouter>
@@ -55,6 +58,14 @@ function App() {
             path="reports"
             element={<Reports />}
           />
+          <Route
+            path="/checkin"
+            element={<CheckInScanner/>}
+          />
+          <Route
+          path="/admin/checkin-history"
+          element={<CheckInHistory/>}
+        />
         </Route>
       </Routes>
     </BrowserRouter>
