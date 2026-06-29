@@ -31,4 +31,14 @@ export const getPayments =
 export const getUsers =
   () => API.get("/users");
 
+export const getUserBookings =
+  (userId) =>
+    API.get(
+      `/bookings/user/${userId}`
+    );
+
+export const getUserById =
+  (id) =>
+    API.get(`/users/${id}`);
+
 export default API;

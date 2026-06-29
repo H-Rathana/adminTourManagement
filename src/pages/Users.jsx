@@ -12,7 +12,11 @@ import {
   Users,
   ShieldCheck,
   User,
+  Book,
 } from "lucide-react";
+import {
+  useNavigate,
+} from "react-router-dom";  
 
 const UsersPage = () => {
 
@@ -24,6 +28,9 @@ const UsersPage = () => {
 
   const [search, setSearch] =
     useState("");
+  
+  const navigate =
+  useNavigate();
 
   // ✅ FETCH USERS
   const fetchUsers =
@@ -131,7 +138,7 @@ const UsersPage = () => {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
 
         {/* TOTAL USERS */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
@@ -223,7 +230,37 @@ const UsersPage = () => {
           </div>
 
         </div>
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
 
+          <div className="flex justify-between items-center">
+
+            <div>
+
+              <p className="text-gray-500 text-sm">
+                Total Bookings
+              </p>
+
+              <h2 className="text-3xl font-bold mt-1">
+
+                {users.reduce(
+                  (sum, user) =>
+                    sum +
+                    Number(user.total_bookings),
+                  0
+                )}
+
+              </h2>
+
+            </div>
+
+            <Book
+              className="text-green-500"
+            />
+
+          </div>
+
+        </div>
+        
       </div>
 
       {/* FILTERS */}
@@ -282,6 +319,9 @@ const UsersPage = () => {
                 <th className="text-left">
                   Email
                 </th>
+                <th className="text-left">
+                Bookings
+                </th>
 
                 <th className="text-left">
                   Role
@@ -311,12 +351,80 @@ const UsersPage = () => {
                     {u.user_id}
                   </td>
 
-                  <td className="font-medium">
-                    {u.name}
+                  <td>
+                    <div className="flex items-center gap-3">
+
+                      {u.profile_image ? (
+
+                        <img
+                          src={`http://localhost:5000/uploads/profiles/${u.profile_image}`}
+                          alt=""
+                          className="
+                            w-11
+                            h-11
+                            rounded-full
+                            object-cover
+                          "
+                        />
+
+                      ) : (
+
+                        <div
+                          className="
+                          w-11
+                          h-11
+                          rounded-full
+                          bg-sky-100
+                          text-sky-600
+                          flex
+                          items-center
+                          justify-center
+                          font-bold
+                          "
+                        >
+                          {u.name?.charAt(0)}
+                        </div>
+
+                      )}
+
+                      <div>
+                        <p className="font-semibold">
+                          {u.name}
+                        </p>
+                        
+                      </div>
+
+                    </div>
                   </td>
 
                   <td>
                     {u.email}
+                  </td>
+                  <td>
+
+                    <button
+                      onClick={() =>
+                        navigate(
+                          `/users/${u.user_id}/bookings`
+                        )
+                      }
+                      className="
+                      px-3
+                      py-1
+                      rounded-full
+                      bg-orange-100
+                      text-orange-600
+                      text-sm
+                      font-medium
+                      hover:bg-orange-200
+                      transition
+                      "
+                    >
+                      {u.total_bookings}
+                      {"  "} Bookings
+                    </button>
+                    
+
                   </td>
 
                   {/* ROLE */}

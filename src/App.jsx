@@ -10,6 +10,8 @@ import UsersPage from "./pages/Users";
 import Reports from "./pages/Reports";
 import CheckInScanner from "./pages/CheckInScanner";
 import CheckInHistory from "./pages/CheckInHistory";
+import Reviews from "./pages/Reviews";
+import UserBookings from "./pages/UserBookings";
 
 function App() {
   return (
@@ -59,12 +61,22 @@ function App() {
             element={<Reports />}
           />
           <Route
+          path="/reviews"
+          element={<Reviews/>}
+          />
+          <Route
             path="/checkin"
             element={<CheckInScanner/>}
           />
           <Route
           path="/admin/checkin-history"
           element={<CheckInHistory/>}
+          />
+          <Route
+          path="/users/:id/bookings"
+          element={
+            <UserBookings/>
+          }
         />
         </Route>
       </Routes>

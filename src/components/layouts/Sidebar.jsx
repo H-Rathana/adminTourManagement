@@ -13,6 +13,7 @@ import {
   FileBarChart,
   UserCircle2,
   History,
+  MessageSquare,
 } from "lucide-react";
 import logo from "../../assets/logopng.png";
 
@@ -189,6 +190,18 @@ to-[#16213E]
 
           <span>
             Users
+          </span>
+
+      </NavLink>
+        <NavLink
+          to="/reviews"
+          className={navClass}
+        >
+
+          <MessageSquare size={20} />
+
+          <span>
+            Reviews
           </span>
 
       </NavLink>
