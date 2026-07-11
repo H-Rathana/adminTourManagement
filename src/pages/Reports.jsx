@@ -30,7 +30,7 @@ import {
 
 const Reports = () => {
     const [report, setReport] = useState(null);
-
+    const [period, setPeriod] = useState("week");
     const fetchReport = async () => {
         try {
             const res = await API.get("/reports");
@@ -60,6 +60,40 @@ const Reports = () => {
             </div>
         );
     }
+    const revenue =
+  period === "week"
+    ? report?.revenueWeek
+    : period === "month"
+    ? report?.revenueMonth
+    : report?.revenueYear;
+
+    const topTour =
+  period === "week"
+    ? report?.topTourWeek
+    : period === "month"
+    ? report?.topTourMonth
+    : report?.topTourYear;
+
+    const topTours =
+  period === "week"
+    ? report?.topToursWeek
+    : period === "month"
+    ? report?.topToursMonth
+    : report?.topToursYear;
+
+    const bookingStats =
+  period === "week"
+    ? report?.week
+    : period === "month"
+    ? report?.month
+    : report?.year;
+
+    const periodLabel =
+  period === "week"
+    ? "This Week"
+    : period === "month"
+    ? "This Month"
+    : "This Year";
 
     return (
         <div>
@@ -87,7 +121,7 @@ const Reports = () => {
                             rounded-xl
                     "
                     onClick={() =>
-                    exportReportPDF(report)
+                        exportReportPDF(report, period)
                     }
                 >
                     <FileText size={18} />
@@ -95,7 +129,42 @@ const Reports = () => {
                 </button>
 
             </div>
+            <div className="flex gap-3 mb-8">
 
+                    {[
+                        {
+                        key: "week",
+                        label: "This Week",
+                        },
+                        {
+                        key: "month",
+                        label: "This Month",
+                        },
+                        {
+                        key: "year",
+                        label: "This Year",
+                        },
+                    ].map((item) => (
+
+                        <button
+                        key={item.key}
+                        onClick={() => setPeriod(item.key)}
+                        className={`
+                            px-6 py-3 rounded-xl font-medium transition
+
+                            ${
+                            period === item.key
+                                ? "bg-sky-500 text-white shadow-lg"
+                                : "bg-white hover:bg-slate-100"
+                            }
+                        `}
+                        >
+                        {item.label}
+                        </button>
+
+                    ))}
+
+            </div>
             {/* Statistics */}
             <div className="grid lg:grid-cols-5 gap-5">
 
@@ -121,11 +190,11 @@ const Reports = () => {
                     />
 
                     <p className="text-gray-500">
-                        Bookings
+                         Bookings ({periodLabel})
                     </p>
 
                     <h2 className="text-3xl font-bold">
-                        {report.totalBookings}
+                        {bookingStats?.bookings || 0}
                     </h2>
                 </div>
 
@@ -140,7 +209,7 @@ const Reports = () => {
                     </p>
 
                     <h2 className="text-3xl font-bold">
-                        {report.approved}
+                        {bookingStats?.approved || 0}
                     </h2>
                 </div>
 
@@ -155,7 +224,7 @@ const Reports = () => {
                     </p>
 
                     <h2 className="text-3xl font-bold">
-                        {report.completed}
+                        {bookingStats?.completed || 0}
                     </h2>
                 </div>
                 <div className="bg-white p-5 rounded-2xl shadow-sm">
@@ -169,7 +238,7 @@ const Reports = () => {
                     </p>
 
                     <h2 className="text-3xl font-bold">
-                        {report.pending}
+                        {bookingStats?.pending || 0}
                     </h2>
                 </div>
 
@@ -184,164 +253,79 @@ const Reports = () => {
                     </p>
 
                     <h2 className="text-3xl font-bold">
-                        {report.rejected}
+                        {bookingStats?.rejected || 0}
                     </h2>
                 </div>
 
             </div>
-            <div className="grid lg:grid-cols-3 gap-5 mt-8">
-
+            <div className="grid lg:grid-cols-2 gap-5 mt-8">
                 <div className="bg-white p-6 rounded-2xl shadow-sm">
-                    <CalendarDays
-                    size={32}
-                    className="text-orange-500 mb-3"
-                    />
 
-                    <p className="text-gray-500">
-                    Top Tour This Week
-                    </p>
-
-                    <h2 className="text-2xl font-bold mt-2">
-                    {report.topTourWeek?.title || "No Data"}
-                    </h2>
-
-                    <p className="text-gray-500">
-                    {report.topTourWeek?.bookings || 0}
-                    {" "}Bookings
-                    </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                    <CalendarRange
-                    size={32}
-                    className="text-sky-500 mb-3"
-                    />
-
-                    <p className="text-gray-500">
-                    Top Tour This Month
-                    </p>
-
-                    <h2 className="text-2xl font-bold mt-2">
-                    {report.topTourMonth?.title || "No Data"}
-                    </h2>
-
-                    <p className="text-gray-500">
-                    {report.topTourMonth?.bookings || 0}
-                    {" "}Bookings
-                    </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-2xl shadow-sm">
-                    <Trophy
-                    size={32}
-                    className="text-yellow-500 mb-3"
-                    />
-
-                    <p className="text-gray-500">
-                    Top Tour This Year
-                    </p>
-
-                    <h2 className="text-2xl font-bold mt-2">
-                    {report.topTourYear?.title || "No Data"}
-                    </h2>
-
-                    <p className="text-gray-500">
-                    {report.topTourYear?.bookings || 0}
-                    {" "}Bookings
-                    </p>
-                </div>
-
-                </div>
-
-                {/* Revenuse */}
-                <div className="grid lg:grid-cols-3 gap-5 mt-8">
-
-                    <div className="bg-white p-6 rounded-2xl shadow-sm">
-                        <TrendingUp
+                    <TrendingUp
                         size={32}
                         className="text-green-500 mb-3"
-                        />
+                    />
 
-                        <p className="text-gray-500">
-                        Revenue This Week
-                        </p>
+                    <p className="text-gray-500">
+                        Revenue (
+                        {period.charAt(0).toUpperCase() +
+                        period.slice(1)}
+                        )
+                    </p>
 
-                        <h2 className="text-3xl font-bold text-green-600">
-                        ${report.revenueWeek}
-                        </h2>
-                    </div>
+                    <h2 className="text-3xl font-bold text-green-600">
+                        ${revenue}
+                    </h2>
 
-                    <div className="bg-white p-6 rounded-2xl shadow-sm">
-                        <TrendingUp
-                        size={32}
-                        className="text-sky-500 mb-3"
-                        />
-
-                        <p className="text-gray-500">
-                        Revenue This Month
-                        </p>
-
-                        <h2 className="text-3xl font-bold text-green-600">
-                        ${report.revenueMonth}
-                        </h2>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl shadow-sm">
-                        <TrendingUp
-                        size={32}
-                        className="text-orange-500 mb-3"
-                        />
-
-                        <p className="text-gray-500">
-                        Revenue This Year
-                        </p>
-
-                        <h2 className="text-3xl font-bold text-green-600">
-                        ${report.revenueYear}
-                        </h2>
-                    </div>
                 </div>
+                <div className="bg-white p-6 rounded-2xl shadow-sm">
 
-                {/* Top TOur */}
-                <div className="bg-white p-6 rounded-2xl shadow mt-8">
+                    <Trophy
+                        size={32}
+                        className="text-yellow-500 mb-3"
+                    />
 
-                <h2 className="font-semibold text-lg mb-4">
+                    <p className="text-gray-500">
+                        Top Tour (
+                        {period.charAt(0).toUpperCase() +
+                        period.slice(1)}
+                        )
+                    </p>
+
+                    <h2 className="text-2xl font-bold mt-2">
+                        {topTour?.title || "No Data"}
+                    </h2>
+
+                    <p className="text-gray-500">
+                        {topTour?.bookings || 0} Bookings
+                    </p>
+
+                </div>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow mt-8"> 
+                <h2 className="font-semibold text-lg mb-2">
                     Top 5 Most Booked Tours
-                </h2>
+                    </h2>
 
-                <ResponsiveContainer
-                    width="100%"
-                    height={350}
-                >
-                    <BarChart
-                    data={report.topTours}
-                    >
-
-                    <CartesianGrid
-                        strokeDasharray="3 3"
-                    />
-
-                    <XAxis
-                        dataKey="title"
-                    />
-
-                    <YAxis />
-
-                    <Tooltip />
-
-                    <Bar
+                    <p className="text-gray-500 mb-4">
+                    {period === "week"
+                        ? "This Week"
+                        : period === "month"
+                        ? "This Month"
+                        : "This Year"}
+                </p>
+                <ResponsiveContainer width="100%" height={350} > 
+                    <BarChart data={topTours} > 
+                        <CartesianGrid strokeDasharray="3 3" /> 
+                        <XAxis dataKey="title" /> <YAxis /> 
+                        <Tooltip /> 
+                        <Bar  
                         dataKey="bookings"
-                        fill="#f97316"
-                    />
-
-                    </BarChart>
-
-                </ResponsiveContainer>
-
-                </div>
-
-
-
+                        fill="#14B8A6"
+                        radius={[10, 10, 0, 0]}
+                        /> 
+                    </BarChart> 
+                    </ResponsiveContainer> </div>
            <div className="bg-white p-8 rounded-3xl shadow-sm mt-8">
 
                     <div className="mb-6">

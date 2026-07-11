@@ -1,125 +1,281 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const exportReportPDF = (report) => {
+export const exportReportPDF = (
+  report,
+  period
+) => {
 
   const doc = new jsPDF();
 
   const today = new Date();
 
+  const revenue =
+  period === "week"
+    ? report.revenueWeek
+    : period === "month"
+    ? report.revenueMonth
+    : report.revenueYear;
+
+const topTour =
+  period === "week"
+    ? report.topTourWeek
+    : period === "month"
+    ? report.topTourMonth
+    : report.topTourYear;
+
+const periodLabel =
+  period === "week"
+    ? "This Week"
+    : period === "month"
+    ? "This Month"
+    : "This Year";
+
+// =====================
+// SELECTED PERIOD STATS
+// =====================
+
+const stats =
+  period === "week"
+    ? report.week
+    : period === "month"
+    ? report.month
+    : report.year;
+
+const bookings =
+  Number(stats?.bookings || 0);
+
+// const approved =
+//   Number(stats?.approved || 0);
+
+const completed =
+  Number(stats?.completed || 0);
+
+// const pending =
+//   Number(stats?.pending || 0);
+
+const rejected =
+  Number(stats?.rejected || 0);
+
+// const revenueNumber =
+//   Number(revenue || 0);
+
+const now = new Date();
+
+const startOfWeek = new Date(now);
+startOfWeek.setDate(now.getDate() - 7);
+
+const startOfMonth = new Date(
+  now.getFullYear(),
+  now.getMonth(),
+  1
+);
+
+const startOfYear = new Date(
+  now.getFullYear(),
+  0,
+  1
+);
+
+const TABLE_STYLE = {
+
+  margin:{
+    left:14,
+    right:14,
+    bottom:22
+},
+
+  headStyles:{
+    fillColor:[14,165,233],
+    textColor:255,
+    fontStyle:"bold",
+    halign:"center"
+  },
+
+  bodyStyles:{
+    fontSize:10,
+    valign:"middle"
+  },
+
+  alternateRowStyles:{
+    fillColor:[248,250,252]
+  },
+
+  styles:{
+    cellPadding:4
+  }
+  
+
+};
+
+const addSectionTitle = (
+
+title,
+
+y
+
+)=>{
+
+doc.setFontSize(16);
+
+doc.setTextColor(...COLORS.secondary);
+
+doc.text(
+
+title,
+
+14,
+
+y
+
+);
+
+doc.setDrawColor(...COLORS.primary);
+
+};
+
+const money = (value)=>
+
+`$${Number(value).toLocaleString(
+"en-US",
+{
+minimumFractionDigits:2
+}
+)}`;
+
+const filteredTransactions =
+  report.recentTransactions?.filter((item) => {
+
+    const paymentDate =
+      new Date(item.payment_date);
+
+    if (period === "week") {
+
+      return paymentDate >= startOfWeek;
+
+    }
+
+    if (period === "month") {
+
+      return paymentDate >= startOfMonth;
+
+    }
+
+    return paymentDate >= startOfYear;
+
+  }) || [];
   // =====================
   // HEADER
   // =====================
 
-  doc.setFontSize(22);
-  doc.setTextColor(30, 41, 59);
+  doc.setFontSize(24);
 
-  doc.text(
-    "WanderEscape",
-    14,
-    20
-  );
+doc.setTextColor(14,165,233);
 
-  doc.setFontSize(14);
+doc.text("WanderEscape",14,20);
 
-  doc.text(
-    "Tourism Management Report",
-    14,
-    30
-  );
+doc.setFontSize(13);
 
-  doc.line(
-    14,
-    35,
-    195,
-    35
-  );
+doc.setTextColor(51,65,85);
+
+doc.text(
+"TOURISM MANAGEMENT SYSTEM",
+14,
+31
+);
+
+doc.setFontSize(11);
+
+doc.setTextColor(120);
+
+doc.text(
+"Business Performance Report",
+14,
+38
+);
+
+doc.setDrawColor(14,165,233);
+
+doc.setLineWidth(0.8);
+
+doc.line(
+  14,
+  42,
+  195,
+  42
+);
 
   // =====================
   // DATE & PERIOD
   // =====================
 
-  doc.setFontSize(11);
+  doc.setFontSize(10);
 
-  doc.text(
-    `Generated Date: ${today.toLocaleDateString()}`,
-    14,
-    45
-  );
-
-  doc.text(
-    `Generated Time: ${today.toLocaleTimeString()}`,
-    14,
-    52
-  );
-
-  doc.text(
-    `Report Period: January 2026 - ${today.toLocaleDateString()}`,
-    14,
-    59
-  );
-
-  // =====================
-  // EXECUTIVE SUMMARY
-  // =====================
-
-  const executiveSummary = `
-During the reporting period, the WanderEscape Tourism Management System recorded
-${report.totalBookings} bookings and generated total revenue of $${report.totalRevenue}.
-
-The highest-performing tour this year was
-${report.topTourYear?.title || "N/A"}
-with ${report.topTourYear?.bookings || 0} bookings.
-
-Monthly revenue reached $${report.revenueMonth},
-while yearly revenue currently stands at $${report.revenueYear}.
-
-The system successfully completed
-${report.completed || 0} bookings,
-while ${report.rejected || 0}
-bookings were rejected.
-`;
-
-
-// EXECUTIVE SUMMARY
-
-
-doc.setFontSize(16);
+doc.setTextColor(71,85,105);
 
 doc.text(
-  "Executive Summary",
+  `Generated Date : ${today.toLocaleDateString()}`,
   14,
-  75
+  52
 );
-
-doc.setFontSize(11);
-
-doc.setTextColor(
-  80,
-  80,
-  80
-);
-
-const summaryLines =
-  doc.splitTextToSize(
-    executiveSummary,
-    180
-  );
 
 doc.text(
-  summaryLines,
+  `Generated Time : ${today.toLocaleTimeString()}`,
   14,
-  85
+  58
+);
+
+doc.text(
+  `Report Period : ${periodLabel}`,
+  14,
+  64
+);
+
+doc.setFontSize(10);
+
+doc.setTextColor(220,38,38);
+
+doc.text(
+  "CONFIDENTIAL",
+  195,
+  18,
+  {
+    align:"right"
+  }
 );
 
 
-const summaryEndY =
-  85 +
-  (summaryLines.length * 6);
+doc.setFontSize(18);
+const COLORS = {
 
-  // =====================
-  // REPORT SUMMARY
-  // =====================
+primary: [14,165,233],
+
+secondary: [30,41,59],
+
+gray: [100,116,139],
+
+success: [22,163,74],
+
+warning: [245,158,11],
+
+danger: [220,38,38]
+
+};
+
+const completionRate =
+  bookings > 0
+    ? ((completed / bookings) * 100).toFixed(1)
+    : 0;
+
+const rejectionRate =
+  bookings > 0
+    ? ((rejected / bookings) * 100).toFixed(1)
+    : 0;
+
+const averageBookingValue =
+  bookings > 0
+    ? (revenue / bookings).toFixed(2)
+    : 0;
 
 doc.setFontSize(16);
 
@@ -129,47 +285,66 @@ doc.setTextColor(
   59
 );
 
-doc.text(
-  "Report Summary",
-  14,
-  summaryEndY + 10
+addSectionTitle(
+  "Business Performance Summary",
+  72
 );
 
-autoTable(doc, {
+autoTable(doc,{
 
-  startY:
-    summaryEndY + 15,
+  ...TABLE_STYLE,
 
-  head: [
-    ["Metric", "Value"]
-  ],
+  startY:78,
+headStyles:{
+    fillColor:[14,165,233]
+},
+head: [
+  ["Operational KPI", "Result"]
+],
 
-  body: [
-    [
-      "Total Revenue",
-      `$${report.totalRevenue}`
-    ],
-    [
-      "Total Bookings",
-      report.totalBookings
-    ],
-    [
-      "Approved",
-      report.approved
-    ],
-    [
-      "Completed",
-      report.completed
-    ],
-    [
-      "Pending",
-      report.pending
-    ],
-    [
-      "Rejected",
-      report.rejected
-    ]
-  ]
+body: [
+
+[
+"Report Period",
+periodLabel
+],
+
+[
+"Total Booking Requests",
+bookings
+],
+
+[
+"Revenue Generated",
+money(revenue)
+],
+
+[
+"Average Booking Value",
+`$${averageBookingValue}`
+],
+
+[
+"Completion Rate",
+`${completionRate}%`
+],
+
+[
+"Rejection Rate",
+`${rejectionRate}%`
+],
+
+[
+"Most Popular Tour",
+topTour?.title || "N/A"
+],
+
+// [
+// "Customer Review Score",
+// topTour?.bookings || 0
+// ]
+
+]
 
 });
 
@@ -177,96 +352,74 @@ autoTable(doc, {
   // TOP TOURS
   // =====================
 
-  doc.setFontSize(16);
-
-  doc.text(
-    "Top Performing Tours",
-    14,
+  addSectionTitle(
+    "Featured Tour",
     doc.lastAutoTable.finalY + 15
-  );
+);
 
   autoTable(doc, {
 
     startY:
       doc.lastAutoTable.finalY + 20,
-
+    
     head: [[
       "Period",
       "Tour Name",
       "Bookings"
     ]],
-
+    ...TABLE_STYLE,
     body: [
 
-      [
-        "This Week",
-        report.topTourWeek?.title || "N/A",
-        report.topTourWeek?.bookings || 0
-      ],
+          [
+            periodLabel,
+            topTour?.title || "N/A",
+            topTour?.bookings || 0
+          ]
 
-      [
-        "This Month",
-        report.topTourMonth?.title || "N/A",
-        report.topTourMonth?.bookings || 0
-      ],
-
-      [
-        "This Year",
-        report.topTourYear?.title || "N/A",
-        report.topTourYear?.bookings || 0
-      ],
-
-    ],
-
+          ],
+    headStyles:{
+    fillColor:[249,115,22]
+},
   });
 
   // =====================
   // REVENUE ANALYTICS
   // =====================
 
-  doc.setFontSize(16);
-
-  doc.text(
+  addSectionTitle(
     "Revenue Analytics",
-    14,
     doc.lastAutoTable.finalY + 15
-  );
+    
+);
 
   autoTable(doc, {
 
     startY:
       doc.lastAutoTable.finalY + 20,
-
+    
     head: [[
       "Period",
       "Revenue"
     ]],
-
+    ...TABLE_STYLE,
     body: [
 
-      [
-        "This Week",
-        `$${report.revenueWeek}`
-      ],
+        [
+          periodLabel,
+          money(revenue)
+        ]
 
-      [
-        "This Month",
-        `$${report.revenueMonth}`
-      ],
-
-      [
-        "This Year",
-        `$${report.revenueYear}`
-      ],
-
-    ],
+        ],
+        headStyles:{
+    fillColor:[22,163,74]
+},
 
   });
 
   // =====================
   // MONTHLY BOOKINGS
   // =====================
-
+if (period !== "week") {
   const monthlyData =
     report.monthlyBookings?.map(
       (item) => [
@@ -290,53 +443,64 @@ autoTable(doc, {
     totalMonthlyBookings
   ]);
 
-  doc.setFontSize(16);
-
-  doc.text(
+ addSectionTitle(
     "Monthly Booking Trend",
-    14,
     doc.lastAutoTable.finalY + 15
-  );
+);
 
   autoTable(doc, {
 
     startY:
       doc.lastAutoTable.finalY + 20,
-
     head: [[
       "Month",
       "Bookings"
     ]],
-
+    ...TABLE_STYLE,
     body: monthlyData,
-
+    headStyles:{
+    fillColor:[139,92,246]
+},
   });
+}
 
   // =====================
   // TOP 5 TOURS
   // =====================
 
-  doc.setFontSize(16);
+  const topTours =
 
-  doc.text(
+  period === "week"
+
+    ? report.topToursWeek
+
+    : period === "month"
+
+    ? report.topToursMonth
+
+    : report.topToursYear;
+
+  addSectionTitle(
     "Top 5 Most Booked Tours",
-    14,
     doc.lastAutoTable.finalY + 15
-  );
+);
 
   autoTable(doc, {
 
     startY:
       doc.lastAutoTable.finalY + 20,
-
+    
     head: [[
       "Rank",
       "Tour",
       "Bookings"
     ]],
-
+    ...TABLE_STYLE,
+    headStyles:{
+    fillColor:[79,70,229]
+},
     body:
-      report.topTours?.map(
+      topTours?.map(
         (tour, index) => [
 
           index + 1,
@@ -354,19 +518,15 @@ autoTable(doc, {
   // RECENT TRANSACTIONS
   // =====================
 
-  doc.setFontSize(16);
-
-  doc.text(
+  addSectionTitle(
     "Recent Transactions",
-    14,
     doc.lastAutoTable.finalY + 15
-  );
+);
 
   autoTable(doc, {
 
     startY:
       doc.lastAutoTable.finalY + 20,
-
     head: [[
       "REF",
       "Customer",
@@ -374,57 +534,95 @@ autoTable(doc, {
       "Status",
       "Date"
     ]],
-
+    ...TABLE_STYLE,
+     headStyles:{
+    fillColor:[71,85,105]
+},
     body:
-      report.recentTransactions?.map(
-        (item) => [
+filteredTransactions.map(item => [
 
-          `#${item.booking_id}`,
+  `#${item.booking_id}`,
 
-          item.full_name,
+  item.full_name,
 
-          `$${item.amount}`,
+  `$${item.amount}`,
 
-          item.payment_status,
+  item.payment_status,
 
-          new Date(
-            item.payment_date
-          ).toLocaleDateString()
+  new Date(
+    item.payment_date
+  ).toLocaleDateString()
 
-        ]
-      ) || [],
+])
 
   });
 
-  // =====================
-  // FOOTER
-  // =====================
+// =====================
+// FOOTER
+// =====================
+
+const pageCount = doc.getNumberOfPages();
+
+for (let i = 1; i <= pageCount; i++) {
+
+  doc.setPage(i);
 
   const pageHeight =
     doc.internal.pageSize.height;
 
-  doc.setFontSize(10);
+  const pageWidth =
+    doc.internal.pageSize.width;
 
-  doc.setTextColor(
-    120,
-    120,
-    120
+  // line above footer
+  doc.setDrawColor(220);
+
+  doc.line(
+    14,
+    pageHeight - 18,
+    pageWidth - 14,
+    pageHeight - 18
   );
 
+  // footer text
+  doc.setFontSize(9);
+
+  doc.setTextColor(120);
+
   doc.text(
-    "Generated by WanderEscape Tourism Management System",
+    "Generated by WanderEscape",
     14,
     pageHeight - 10
   );
+
+  doc.text(
+    `Generated: ${today.toLocaleDateString()}`,
+    pageWidth / 2,
+    pageHeight - 10,
+    { align: "center" }
+  );
+
+  doc.text(
+    `Page ${i} of ${pageCount}`,
+    pageWidth - 14,
+    pageHeight - 10,
+    { align: "right" }
+  );
+
+}
 
   // =====================
   // SAVE
   // =====================
 
   doc.save(
-    `WanderEscape_Report_${today
-      .toISOString()
-      .slice(0, 10)}.pdf`
-  );
+
+`WanderEscape_${periodLabel.replace(
+ /\s/g,
+ "_"
+)}_${today
+  .toISOString()
+  .slice(0,10)}.pdf`
+
+);
 
 };
