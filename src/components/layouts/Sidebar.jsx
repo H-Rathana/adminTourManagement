@@ -16,6 +16,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import logo from "../../assets/logopng.png";
+import { useEffect, useState } from "react";
 
 const Sidebar = () => {
 
@@ -38,6 +39,17 @@ const Sidebar = () => {
     );
 
   };
+  const [admin, setAdmin] = useState(null);
+
+useEffect(() => {
+  const user = JSON.parse(
+    localStorage.getItem("user")
+  );
+
+  if (user) {
+    setAdmin(user);
+  }
+}, []);
 
   // ✅ ACTIVE LINK STYLE
   const navClass = ({ isActive }) =>
@@ -222,11 +234,31 @@ to-[#16213E]
         {/* ADMIN PROFILE */}
         <div className="flex items-center gap-3 mb-4">
 
-          <div
+         <div
             className="
             h-12
             w-12
             rounded-full
+            overflow-hidden
+            border-2
+            border-orange-400
+            "
+            >
+
+            {admin?.profile_image ? (
+
+            <img
+                src={`http://localhost:5000/uploads/profiles/${admin.profile_image}`}
+                alt=""
+                className="w-full h-full object-cover"
+            />
+
+            ) : (
+
+            <div
+            className="
+            w-full
+            h-full
             bg-gradient-to-br
             from-orange-500
             to-amber-400
@@ -234,18 +266,28 @@ to-[#16213E]
             items-center
             justify-center
             "
-          >
-            <UserCircle2 size={24} />
-          </div>
+            >
+
+            <UserCircle2 size={24}/>
+
+            </div>
+
+            )}
+
+            </div>
 
           <div>
 
-            <p className="font-semibold">
-              Admin
+           <p className="font-semibold">
+              {admin?.name}
             </p>
 
             <p className="text-sm text-slate-400">
-              Tourism Manager
+              {admin?.email}
+            </p>
+
+            <p className="text-xs text-orange-400 mt-1">
+              Administrator
             </p>
 
           </div>
