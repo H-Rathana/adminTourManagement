@@ -12,6 +12,8 @@ import {
   CalendarDays,
   CalendarRange,
   TrendingUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import {
@@ -30,28 +32,163 @@ import {
 
 const Reports = () => {
     const [report, setReport] = useState(null);
-    const [period, setPeriod] = useState("week");
+    const [period, setPeriod] = useState("month");
+
+    const [selectedDate, setSelectedDate] = useState(
+        new Date().toISOString().split("T")[0]
+     );
+            
     const fetchReport = async () => {
-        try {
-            const res = await API.get("/reports");
-            setReport(res.data);
-        } catch (error) {
-            console.error(error);
+
+  try {
+
+    const res = await API.get("/reports", {
+      params: {
+        type: period,
+        date: selectedDate,
+      },
+    });
+
+    setReport(res.data);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+};
+const changeDate = (direction) => {
+
+  const current = new Date(selectedDate);
+
+  switch (period) {
+
+    case "day":
+
+      current.setDate(
+        current.getDate() + direction
+      );
+
+      break;
+
+    case "week":
+
+      current.setDate(
+        current.getDate() + direction * 7
+      );
+
+      break;
+
+    case "month":
+
+      current.setMonth(
+        current.getMonth() + direction
+      );
+
+      break;
+
+    case "year":
+
+      current.setFullYear(
+        current.getFullYear() + direction
+      );
+
+      break;
+
+    default:
+      break;
+
+  }
+
+  setSelectedDate(
+    current.toISOString().split("T")[0]
+  );
+
+};
+const formatCurrentPeriod = () => {
+
+  const date = new Date(selectedDate);
+
+  switch (period) {
+
+    case "day":
+
+      return date.toLocaleDateString(
+        "en-US",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
         }
-    };
-    const chartData =
-  report?.monthlyBookings?.map(
-    item => ({
-      ...item,
-      bookings: Number(item.bookings)
-    })
-  ) || [];
-    useEffect(() => {
-        const loadReport = async () => {
-      await fetchReport();
-    };
-        loadReport();
-    }, []);
+      );
+
+    case "week": {
+
+      const firstDay =
+        new Date(date);
+
+      firstDay.setDate(
+        date.getDate() - date.getDay()
+      );
+
+      const lastDay =
+        new Date(firstDay);
+
+      lastDay.setDate(
+        firstDay.getDate() + 6
+      );
+
+      return `${firstDay.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+        }
+      )} - ${lastDay.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }
+      )}`;
+
+    }
+
+    case "month":
+
+      return date.toLocaleDateString(
+        "en-US",
+        {
+          month: "long",
+          year: "numeric",
+        }
+      );
+
+    case "year":
+
+      return date.getFullYear();
+
+    default:
+
+      return "";
+
+  }
+
+};
+//     const chartData2 =
+//   report?.monthlyBookings?.map(
+//     item => ({
+//       ...item,
+//       bookings: Number(item.bookings)
+//     })
+//   ) || [];
+useEffect(() => {
+
+  fetchReport();
+
+}, [period, selectedDate]);
 
     if (!report) {
         return (
@@ -60,40 +197,19 @@ const Reports = () => {
             </div>
         );
     }
-    const revenue =
-  period === "week"
-    ? report?.revenueWeek
-    : period === "month"
-    ? report?.revenueMonth
-    : report?.revenueYear;
+    const bookingStats = report?.bookingStats;
 
-    const topTour =
-  period === "week"
-    ? report?.topTourWeek
-    : period === "month"
-    ? report?.topTourMonth
-    : report?.topTourYear;
+const revenue = report?.revenue;
 
-    const topTours =
-  period === "week"
-    ? report?.topToursWeek
-    : period === "month"
-    ? report?.topToursMonth
-    : report?.topToursYear;
+const topTour = report?.topTour;
 
-    const bookingStats =
-  period === "week"
-    ? report?.week
-    : period === "month"
-    ? report?.month
-    : report?.year;
+const topTours = report?.topTours;
 
-    const periodLabel =
-  period === "week"
-    ? "This Week"
-    : period === "month"
-    ? "This Month"
-    : "This Year";
+const chartData =
+  report?.chartData?.map(item => ({
+    ...item,
+    bookings: Number(item.bookings),
+  })) || [];
 
     return (
         <div>
@@ -121,50 +237,102 @@ const Reports = () => {
                             rounded-xl
                     "
                     onClick={() =>
-                        exportReportPDF(report, period)
-                    }
+                            exportReportPDF(
+                                report,
+                                period,
+                                selectedDate
+                            )
+                            }
                 >
                     <FileText size={18} />
                     Export PDF
                 </button>
 
             </div>
-            <div className="flex gap-3 mb-8">
+                <div className="bg-white rounded-2xl shadow-sm p-5 mb-8">
+
+                <div className="flex flex-wrap items-center justify-between gap-5">
+
+                    {/* Period */}
+
+                    <div className="flex gap-3">
 
                     {[
-                        {
-                        key: "week",
-                        label: "This Week",
-                        },
-                        {
-                        key: "month",
-                        label: "This Month",
-                        },
-                        {
-                        key: "year",
-                        label: "This Year",
-                        },
+                        "day",
+                        "week",
+                        "month",
+                        "year",
                     ].map((item) => (
 
                         <button
-                        key={item.key}
-                        onClick={() => setPeriod(item.key)}
+                        key={item}
+                        onClick={() => setPeriod(item)}
                         className={`
-                            px-6 py-3 rounded-xl font-medium transition
+                            px-5
+                            py-2.5
+                            rounded-xl
+                            font-semibold
+                            transition
 
                             ${
-                            period === item.key
-                                ? "bg-sky-500 text-white shadow-lg"
-                                : "bg-white hover:bg-slate-100"
+                            period === item
+                                ? "bg-sky-500 text-white"
+                                : "bg-slate-100 hover:bg-slate-200"
                             }
                         `}
                         >
-                        {item.label}
+                        {item.charAt(0).toUpperCase() +
+                            item.slice(1)}
                         </button>
 
                     ))}
 
-            </div>
+                    </div>
+
+                    {/* Date Navigation */}
+
+                    <div className="flex items-center gap-4">
+
+                    <button
+                        onClick={() => changeDate(-1)}
+                        className="
+                        p-3
+                        rounded-xl
+                        bg-slate-100
+                        hover:bg-slate-200
+                        "
+                    >
+                        <ChevronLeft size={20}/>
+                    </button>
+
+                    <div
+                        className="
+                        min-w-[220px]
+                        text-center
+                        font-bold
+                        text-lg
+                        "
+                    >
+                        {formatCurrentPeriod()}
+                    </div>
+
+                    <button
+                        onClick={() => changeDate(1)}
+                        className="
+                        p-3
+                        rounded-xl
+                        bg-slate-100
+                        hover:bg-slate-200
+                        "
+                    >
+                        <ChevronRight size={20}/>
+                    </button>
+
+                    </div>
+
+                </div>
+
+                </div>
             {/* Statistics */}
             <div className="grid lg:grid-cols-5 gap-5">
 
@@ -190,7 +358,7 @@ const Reports = () => {
                     />
 
                     <p className="text-gray-500">
-                         Bookings ({periodLabel})
+                         Bookings 
                     </p>
 
                     <h2 className="text-3xl font-bold">
@@ -326,7 +494,7 @@ const Reports = () => {
                         /> 
                     </BarChart> 
                     </ResponsiveContainer> </div>
-           <div className="bg-white p-8 rounded-3xl shadow-sm mt-8">
+           {/* <div className="bg-white p-8 rounded-3xl shadow-sm mt-8">
 
                     <div className="mb-6">
 
@@ -430,7 +598,7 @@ const Reports = () => {
 
                     </ResponsiveContainer>
 
-                    </div>
+                    </div> */}
             <div className="
                 bg-white
                 rounded-3xl

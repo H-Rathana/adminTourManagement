@@ -3,44 +3,111 @@ import autoTable from "jspdf-autotable";
 
 export const exportReportPDF = (
   report,
-  period
+  period,
+  selectedDate
 ) => {
 
   const doc = new jsPDF();
 
   const today = new Date();
+  const reportDate = new Date(selectedDate);
 
-  const revenue =
-  period === "week"
-    ? report.revenueWeek
-    : period === "month"
-    ? report.revenueMonth
-    : report.revenueYear;
+let periodDisplay = "";
 
-const topTour =
-  period === "week"
-    ? report.topTourWeek
-    : period === "month"
-    ? report.topTourMonth
-    : report.topTourYear;
+switch (period) {
+
+  case "day":
+
+    periodDisplay =
+      reportDate.toLocaleDateString(
+        "en-US",
+        {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }
+      );
+
+    break;
+
+  case "week": {
+
+    const firstDay =
+      new Date(reportDate);
+
+    firstDay.setDate(
+      reportDate.getDate() -
+      reportDate.getDay()
+    );
+
+    const lastDay =
+      new Date(firstDay);
+
+    lastDay.setDate(
+      firstDay.getDate() + 6
+    );
+
+    periodDisplay =
+      `${firstDay.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+        }
+      )} - ${lastDay.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }
+      )}`;
+
+    break;
+  }
+
+  case "month":
+
+    periodDisplay =
+      reportDate.toLocaleDateString(
+        "en-US",
+        {
+          month: "long",
+          year: "numeric",
+        }
+      );
+
+    break;
+
+  case "year":
+
+    periodDisplay =
+      reportDate.getFullYear();
+
+    break;
+
+  default:
+
+    periodDisplay = period;
+
+}
+
+  const revenue = Number(report?.revenue || 0);
+
+const topTour = report?.topTour;
+
+const topTours = report?.topTours || [];
+
+const stats = report?.bookingStats || {};
+
+const chartData = report?.chartData || [];
+
+const recentTransactions =
+  report?.recentTransactions || [];
 
 const periodLabel =
-  period === "week"
-    ? "This Week"
-    : period === "month"
-    ? "This Month"
-    : "This Year";
-
-// =====================
-// SELECTED PERIOD STATS
-// =====================
-
-const stats =
-  period === "week"
-    ? report.week
-    : period === "month"
-    ? report.month
-    : report.year;
+  period.charAt(0).toUpperCase() +
+  period.slice(1);
 
 const bookings =
   Number(stats?.bookings || 0);
@@ -65,17 +132,17 @@ const now = new Date();
 const startOfWeek = new Date(now);
 startOfWeek.setDate(now.getDate() - 7);
 
-const startOfMonth = new Date(
-  now.getFullYear(),
-  now.getMonth(),
-  1
-);
+// const startOfMonth = new Date(
+//   now.getFullYear(),
+//   now.getMonth(),
+//   1
+// );
 
-const startOfYear = new Date(
-  now.getFullYear(),
-  0,
-  1
-);
+// const startOfYear = new Date(
+//   now.getFullYear(),
+//   0,
+//   1
+// );
 
 const TABLE_STYLE = {
 
@@ -144,26 +211,7 @@ minimumFractionDigits:2
 )}`;
 
 const filteredTransactions =
-  report.recentTransactions?.filter((item) => {
-
-    const paymentDate =
-      new Date(item.payment_date);
-
-    if (period === "week") {
-
-      return paymentDate >= startOfWeek;
-
-    }
-
-    if (period === "month") {
-
-      return paymentDate >= startOfMonth;
-
-    }
-
-    return paymentDate >= startOfYear;
-
-  }) || [];
+  recentTransactions;
   // =====================
   // HEADER
   // =====================
@@ -226,7 +274,7 @@ doc.text(
 );
 
 doc.text(
-  `Report Period : ${periodLabel}`,
+  `Report Period : ${periodDisplay}`,
   14,
   64
 );
@@ -421,10 +469,10 @@ topTour?.title || "N/A"
   // =====================
 if (period !== "week") {
   const monthlyData =
-    report.monthlyBookings?.map(
+    chartData?.map(
       (item) => [
 
-        item.month,
+        item.label,
 
         item.bookings
 
@@ -432,7 +480,7 @@ if (period !== "week") {
     ) || [];
 
   const totalMonthlyBookings =
-    report.monthlyBookings?.reduce(
+    chartData?.reduce(
       (sum, item) =>
         sum + Number(item.bookings),
       0
@@ -443,8 +491,17 @@ if (period !== "week") {
     totalMonthlyBookings
   ]);
 
- addSectionTitle(
-    "Monthly Booking Trend",
+const chartTitle =
+  period === "day"
+    ? "Daily Booking Trend"
+    : period === "week"
+    ? "Weekly Booking Trend"
+    : period === "month"
+    ? "Monthly Booking Trend"
+    : "Yearly Booking Trend";
+
+addSectionTitle(
+    chartTitle,
     doc.lastAutoTable.finalY + 15
 );
 
@@ -452,10 +509,17 @@ if (period !== "week") {
 
     startY:
       doc.lastAutoTable.finalY + 20,
-    head: [[
-      "Month",
-      "Bookings"
-    ]],
+   head: [[
+  period === "day"
+    ? "Hour"
+    : period === "week"
+    ? "Day"
+    : period === "month"
+    ? "Day"
+    : "Month",
+
+  "Bookings"
+]],
     ...TABLE_STYLE,
     body: monthlyData,
     headStyles:{
@@ -464,21 +528,6 @@ if (period !== "week") {
   });
 }
 
-  // =====================
-  // TOP 5 TOURS
-  // =====================
-
-  const topTours =
-
-  period === "week"
-
-    ? report.topToursWeek
-
-    : period === "month"
-
-    ? report.topToursMonth
-
-    : report.topToursYear;
 
   addSectionTitle(
     "Top 5 Most Booked Tours",

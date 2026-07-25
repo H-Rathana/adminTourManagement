@@ -41,4 +41,27 @@ export const getUserById =
   (id) =>
     API.get(`/users/${id}`);
 
+export const getTourGallery = async (tourId) => {
+  const res = await API.get(`/gallery/${tourId}`);
+  return res.data;
+};
+
+export const uploadGalleryImage = async (
+  tourId,
+  formData
+) => {
+  const res = await API.post(
+    `/gallery/${tourId}`,
+    formData
+  );
+
+  return res.data;
+};
+
+export const deleteGalleryImage = async (
+  galleryId
+) => {
+  return API.delete(`/gallery/${galleryId}`);
+};
+
 export default API;

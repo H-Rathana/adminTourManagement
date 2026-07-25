@@ -17,16 +17,25 @@ const Tours = () => {
   const [editingTour, setEditingTour] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
-
+  
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    location: "",
-    price: "",
-    duration: "",
-    max_people: "",
-    image: null,
-  });
+  title: "",
+  description: "",
+  itinerary: "",
+  location: "",
+  price: "",
+  duration: "",
+  max_people: "",
+
+  available_from: "",
+  available_until: "",
+
+  status: "ACTIVE",
+
+  image: null,
+});
 
   const fetchTours = async () => {
     try {
@@ -47,20 +56,25 @@ const Tours = () => {
 
   const createTour = async () => {
     try {
-      if (
-        !formData.title ||
-        !formData.description ||
-        !formData.location ||
-        !formData.price ||
-        !formData.duration ||
-        !formData.max_people ||
-        !formData.image
-      ) {
-        toast.error(
-          "Please fill all fields and select image!"
-        );
-        return;
-      }
+      const requiredFields = {
+          title: "Tour Title",
+          description: "Description",
+          itinerary: " itinerary ",
+          location: "Location",
+          price: "Price",
+          duration: "Duration",
+          max_people: "Maximum People",
+          available_from: "Available From",
+          available_until: "Available Until",
+          image: "Tour Image",
+        };
+
+        for (const [key, label] of Object.entries(requiredFields)) {
+          if (!formData[key]) {
+            toast.error(`${label} is required.`);
+            return;
+          }
+        }
 
       const data = new FormData();
 
@@ -100,6 +114,7 @@ const Tours = () => {
         "description",
         formData.description
       );
+      data.append("itinerary",formData.itinerary);
       data.append(
         "location",
         formData.location
@@ -112,6 +127,20 @@ const Tours = () => {
       data.append(
         "max_people",
         formData.max_people
+      );
+      data.append(
+        "available_from",
+        formData.available_from
+      );
+
+      data.append(
+        "available_until",
+        formData.available_until
+      );
+
+      data.append(
+        "status",
+        formData.status
       );
 
       if (formData.image) {
@@ -196,18 +225,33 @@ const Tours = () => {
     setEditingTour(tour);
 
     setFormData({
-      title: tour.title || "",
-      description:
-        tour.description || "",
-      location:
-        tour.location || "",
-      price: tour.price || "",
-      duration:
-        tour.duration || "",
-      max_people:
-        tour.max_people || "",
-      image: null,
-    });
+
+  title: tour.title || "",
+
+  description: tour.description || "",
+
+  itinerary: tour.itinerary || "",
+
+  location: tour.location || "",
+
+  price: tour.price || "",
+
+  duration: tour.duration || "",
+
+  max_people: tour.max_people || "",
+
+  available_from:
+    tour.available_from || "",
+
+  available_until:
+    tour.available_until || "",
+
+  status:
+    tour.status || "ACTIVE",
+
+  image: null,
+
+});
 
     setShowModal(true);
 
@@ -218,27 +262,66 @@ const Tours = () => {
     setEditingTour(null);
 
     setFormData({
+
       title: "",
       description: "",
+      itinerary: "",
       location: "",
       price: "",
+
       duration: "",
+
       max_people: "",
+
+      available_from: "",
+      available_until: "",
+
+      status: "ACTIVE",
+
       image: null,
+
     });
 
     setShowModal(true);
 
   };
+  
+  const activeCount =
+  tours.filter(
+    (tour) => tour.status === "ACTIVE"
+  ).length;
+
+const fullCount =
+  tours.filter(
+    (tour) => tour.status === "FULL"
+  ).length;
+
+const expiredCount =
+  tours.filter(
+    (tour) => tour.status === "EXPIRED"
+  ).length;
 
   const filteredTours =
-    tours.filter((tour) =>
+  tours.filter((tour) => {
+
+    const matchesSearch =
       tour.title
         .toLowerCase()
         .includes(
           search.toLowerCase()
-        )
+        );
+
+    const matchesStatus =
+      statusFilter === "ALL"
+        ? true
+        : tour.status === statusFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus
     );
+
+  });
 
 
   const averagePrice =
@@ -261,6 +344,7 @@ const Tours = () => {
       )
     ).size;
 
+ 
   return (
     <div>
 
@@ -381,35 +465,152 @@ const Tours = () => {
       </div>
 
       {/* SEARCH */}
-      <div className="relative mb-8">
+      <div className="space-y-5 mb-8">
 
-        <Search
-          size={18}
-          className="absolute left-4 top-4 text-gray-400"
-        />
+  {/* Search */}
 
-        <input
-          type="text"
-          placeholder="Search tours..."
-          value={search}
-          onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
-          }
-          className="
-          w-full
-          bg-white
-          border
-          rounded-xl
-          py-3
-          pl-12
-          pr-4
-          shadow-sm
-          "
-        />
+  <div className="relative">
 
-      </div>
+    <Search
+      size={18}
+      className="
+      absolute
+      left-4
+      top-4
+      text-gray-400
+      "
+    />
+
+    <input
+      type="text"
+      placeholder="Search tour..."
+      value={search}
+      onChange={(e)=>
+        setSearch(
+          e.target.value
+        )
+      }
+      className="
+      w-full
+      bg-white
+      border
+      rounded-2xl
+      py-3
+      pl-12
+      pr-4
+      shadow-sm
+      "
+    />
+
+  </div>
+
+  {/* Status Filter */}
+
+  <div className="flex flex-wrap gap-3">
+
+    <button
+      onClick={()=>
+        setStatusFilter("ALL")
+      }
+      className={`
+      px-5
+      py-2
+      rounded-full
+      font-semibold
+      transition
+
+      ${
+        statusFilter==="ALL"
+          ? "bg-slate-800 text-white"
+          : "bg-white border"
+      }
+      `}
+    >
+
+      All
+
+      ({tours.length})
+
+    </button>
+
+    <button
+      onClick={()=>
+        setStatusFilter("ACTIVE")
+      }
+      className={`
+      px-5
+      py-2
+      rounded-full
+      font-semibold
+      transition
+
+      ${
+        statusFilter==="ACTIVE"
+          ? "bg-emerald-500 text-white"
+          : "bg-emerald-50 text-emerald-700"
+      }
+      `}
+    >
+
+      Active
+
+      ({activeCount})
+
+    </button>
+
+    <button
+      onClick={()=>
+        setStatusFilter("FULL")
+      }
+      className={`
+      px-5
+      py-2
+      rounded-full
+      font-semibold
+      transition
+
+      ${
+        statusFilter==="FULL"
+          ? "bg-orange-500 text-white"
+          : "bg-orange-50 text-orange-700"
+      }
+      `}
+    >
+
+      Full
+
+      ({fullCount})
+
+    </button>
+
+    <button
+      onClick={()=>
+        setStatusFilter("EXPIRED")
+      }
+      className={`
+      px-5
+      py-2
+      rounded-full
+      font-semibold
+      transition
+
+      ${
+        statusFilter==="EXPIRED"
+          ? "bg-red-500 text-white"
+          : "bg-red-50 text-red-700"
+      }
+      `}
+    >
+
+      Expired
+
+      ({expiredCount})
+
+    </button>
+
+  </div>
+
+</div>
 
       {/* TOUR GRID */}
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
@@ -431,19 +632,21 @@ const Tours = () => {
       {showModal && (
 
         <AddTourModal
-          onClose={() => {
-            setShowModal(false);
-            setEditingTour(null);
-          }}
-          formData={formData}
-          setFormData={setFormData}
-          onSubmit={
-            editingTour
-              ? updateTour
-              : createTour
-          }
-          isEdit={!!editingTour}
-          editingTour={editingTour}
+           onClose={() => {
+              setShowModal(false);
+              setEditingTour(null);
+            }}
+            formData={formData}
+            setFormData={setFormData}
+            onSubmit={
+              editingTour
+                ? updateTour
+                : createTour
+            }
+            isEdit={!!editingTour}
+            editingTour={editingTour}
+
+            fetchTours={fetchTours}
         />
 
       )}

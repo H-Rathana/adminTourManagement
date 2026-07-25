@@ -66,6 +66,10 @@ const BookingDetailsModal = ({
                 <Phone size={18} />
                 {booking.phone}
               </div>
+              <div className="flex items-center gap-2">
+                <User size={18} />
+                {booking.people_count} traveler
+              </div>
 
             </div>
 
