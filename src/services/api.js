@@ -41,6 +41,22 @@ export const getUserById =
   (id) =>
     API.get(`/users/${id}`);
 
+// ✅ Promote User
+export const promoteUser = (id) =>
+  API.patch(`/users/${id}/promote`);
+
+// ✅ Demote User
+export const demoteUser = (id) =>
+  API.patch(`/users/${id}/demote`);
+
+// ✅ Delete User
+export const deleteUser = (id) =>
+  API.delete(`/users/${id}`);
+
+// ✅ Reset User Password
+export const resetUserPassword = (id, data) =>
+  API.patch(`/users/${id}/reset-password`,data);
+
 export const getTourGallery = async (tourId) => {
   const res = await API.get(`/gallery/${tourId}`);
   return res.data;

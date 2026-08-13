@@ -77,17 +77,12 @@ const AdminLogin = () => {
 
         // ❌ NOT ADMIN
         if (
-          data.user.role !==
-          "admin"
-        ) {
-
-          alert(
-            "Access denied"
-          );
-
+          data.user.role !== "admin" &&
+          data.user.role !== "SUPER_ADMIN"
+      ) {
+          alert("Access denied");
           return;
-
-        }
+      }
 
         // ✅ SAVE TOKEN
         localStorage.setItem(

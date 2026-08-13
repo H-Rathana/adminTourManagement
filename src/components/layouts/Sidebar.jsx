@@ -287,7 +287,7 @@ to-[#16213E]
             </p>
 
             <p className="text-xs text-orange-400 mt-1">
-              Administrator
+              {admin?.role}
             </p>
 
           </div>

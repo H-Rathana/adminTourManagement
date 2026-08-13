@@ -2,17 +2,26 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import toast from "react-hot-toast";
 import {
   getUsers,
+  promoteUser,
+  demoteUser,
+  deleteUser,
+  resetUserPassword,
 } from "../services/api";
-
+import ConfirmModal from "../components/ConfirmModal";
+import ResetPasswordModal from "../components/ResetPasswordModal";
 import {
   Search,
   Users,
   ShieldCheck,
   User,
   Book,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  Trash2,
+  KeyRound,
 } from "lucide-react";
 import {
   useNavigate,
@@ -28,6 +37,30 @@ const UsersPage = () => {
 
   const [search, setSearch] =
     useState("");
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [resetPasswordOpen, setResetPasswordOpen] =
+  useState(false);
+
+  const [selectedUser, setSelectedUser] =
+  useState(null);
+
+  const [resetPasswordLoading, setResetPasswordLoading] =
+  useState(false);
+  
+  const [modalData, setModalData] = useState({
+  title: "",
+  message: "",
+  confirmText: "",
+  confirmColor: "red",
+  onConfirm: () => {},
+});
+
+  const currentUser = JSON.parse(
+  localStorage.getItem("user")
+);
+
+  const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
   
   const navigate =
   useNavigate();
@@ -52,6 +85,126 @@ const UsersPage = () => {
       }
 
     };
+    const handlePromote = async (userId) => {
+  try {
+
+    await promoteUser(userId);
+
+    toast.success("User promoted successfully");
+
+    fetchUsers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+        error.response?.data?.message ||
+        "Failed to promote user"
+        );
+
+  }
+};
+const handleDemote = async (userId) => {
+
+  try {
+
+    await demoteUser(userId);
+
+    toast.success( "User demoted successfully");
+
+    fetchUsers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+    error.response?.data?.message ||
+    "Failed to demote user"
+    );
+
+  }
+
+};
+const handleDelete = async (userId, name) => {
+
+  try {
+
+    await deleteUser(userId);
+
+    toast.success("User deleted successfully");
+
+    fetchUsers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Something went wrong"
+      );
+
+  }
+
+};
+const handleResetPasswordForm = async (data) => {
+
+  if (!selectedUser) return;
+
+  try {
+
+    setResetPasswordLoading(true);
+
+    await resetUserPassword(
+      selectedUser.user_id,
+      data
+    );
+
+    toast.success(
+      "Password reset successfully"
+    );
+
+    setResetPasswordOpen(false);
+    setSelectedUser(null);
+
+  } catch (error) {
+
+    console.error(error);
+
+    toast.error(
+      error.response?.data?.message ||
+      "Failed to reset password"
+    );
+
+  } finally {
+
+    setResetPasswordLoading(false);
+
+  }
+};
+const openResetPasswordModal = (user) => {
+  setSelectedUser(user);
+  setResetPasswordOpen(true);
+};
+const openConfirmModal = ({
+  title,
+  message,
+  confirmText,
+  confirmColor,
+  onConfirm,
+}) => {
+  setModalData({
+    title,
+    message,
+    confirmText,
+    confirmColor,
+    onConfirm,
+  });
+
+  setModalOpen(true);
+};
 
   useEffect(() => {
     const loadUser = async ()=>{
@@ -330,7 +483,13 @@ const UsersPage = () => {
                 <th className="text-left">
                   Joined
                 </th>
-
+                {
+                    isSuperAdmin && (
+                      <th className="text-left">
+                        Actions
+                      </th>
+                    )
+                  }
               </tr>
 
             </thead>
@@ -432,19 +591,15 @@ const UsersPage = () => {
 
                     <span
                       className={`px-4 py-1 rounded-full text-sm font-medium
-
-                      ${
-                        u.role ===
-                        "admin"
-
-                          ? "bg-emerald-100 text-emerald-600"
-
-                          : "bg-sky-100 text-sky-600"
-                      }`}
+                        ${
+                          u.role === "SUPER_ADMIN"
+                            ? "bg-red-100 text-red-600"
+                            : u.role === "admin"
+                            ? "bg-emerald-100 text-emerald-600"
+                            : "bg-sky-100 text-sky-600"
+                        }`}
                     >
-
                       {u.role}
-
                     </span>
 
                   </td>
@@ -464,6 +619,131 @@ const UsersPage = () => {
                     )}
 
                   </td>
+                  {
+                        isSuperAdmin && (
+                          <td>
+                            <div className="flex items-center gap-2">
+
+                              {/* Promote */}
+                              {
+                                u.role === "customer" && (
+                                 <button
+                                    title="Promote to Admin"
+                                    onClick={() =>
+                                      handlePromote(u.user_id)
+                                    }
+                                    className="
+                                      p-2
+                                      rounded-lg
+                                      bg-green-100
+                                      text-green-600
+                                      hover:bg-green-200
+                                      hover:scale-110
+                                      transition
+                                    "
+                                  >
+                                    <ArrowUpCircle size={18}/>
+                                  </button>
+                                )
+                              }
+
+                              {/* Demote */}
+                              {
+                                u.role === "admin" && (
+                                  <button
+                                      title="Demote to User"
+                                      onClick={() =>
+                                        handleDemote(u.user_id)
+                                      }
+                                      className="
+                                        p-2
+                                        rounded-lg
+                                        bg-orange-100
+                                        text-orange-600
+                                        hover:bg-orange-200
+                                        hover:scale-110
+                                        transition
+                                      "
+                                    >
+                                      <ArrowDownCircle size={18}/>
+                                    </button>
+                                )
+                              }
+                              {/* Reset Password */}
+                                {u.role !== "SUPER_ADMIN" && (
+                                  <button
+                                    type="button"
+                                    title="Reset Password"
+                                    onClick={() =>
+                                        openResetPasswordModal(u)
+                                      }
+                                    className="
+                                      p-2
+                                      rounded-lg
+                                      bg-sky-100
+                                      text-sky-600
+                                      hover:bg-sky-200
+                                      hover:scale-110
+                                      transition
+                                      duration-200
+                                    "
+                                  >
+                                    <KeyRound size={18} />
+                                  </button>
+                                )}
+                              {/* Delete */}
+                              {
+                                u.role !== "SUPER_ADMIN" && (
+                                 <button
+                                    title="Delete User"
+                                    onClick={() =>
+                                      openConfirmModal({
+                                        title: "Delete User",
+                                        message: `Are you sure you want to delete "${u.name}"? This action cannot be undone.`,
+                                        confirmText: "Delete",
+                                        confirmColor: "red",
+                                        onConfirm: () =>
+                                          handleDelete(
+                                            u.user_id,
+                                            u.name
+                                          ),
+                                      })
+                                    }
+                                    className="
+                                      p-2
+                                      rounded-lg
+                                      bg-red-100
+                                      text-red-600
+                                      hover:bg-red-200
+                                      hover:scale-110
+                                      transition
+                                    "
+                                  >
+                                    <Trash2 size={18}/>
+                                  </button>
+                                )
+                              }
+
+                              {
+                                u.role === "SUPER_ADMIN" && (
+                                  <span className="
+                                          px-3
+                                          py-1
+                                          rounded-full
+                                          bg-gray-100
+                                          text-gray-500
+                                          text-xs
+                                          font-medium
+                                          ">
+                                          Protected
+                                 </span>
+                                )
+                              }
+
+                            </div>
+                          </td>
+                        )
+                      }
 
                 </tr>
 
@@ -476,7 +756,30 @@ const UsersPage = () => {
         </div>
 
       </div>
+      <ConfirmModal
+        open={modalOpen}
+        title={modalData.title}
+        message={modalData.message}
+        confirmText={modalData.confirmText}
+        confirmColor={modalData.confirmColor}
+        onClose={() => setModalOpen(false)}
+        onConfirm={() => {
+          modalData.onConfirm();
+          setModalOpen(false);
+        }}
+      />
+      <ResetPasswordModal
+        open={resetPasswordOpen}
+        user={selectedUser}
+        loading={resetPasswordLoading}
+        onClose={() => {
+          if (resetPasswordLoading) return;
 
+          setResetPasswordOpen(false);
+          setSelectedUser(null);
+        }}
+        onConfirm={handleResetPasswordForm}
+      />
     </div>
 
   );

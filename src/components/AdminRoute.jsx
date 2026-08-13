@@ -23,17 +23,12 @@ const AdminRoute = ({
   }
 
   // ❌ NOT ADMIN
-  if (
-    user.role !== "admin"
-  ) {
-
-    return (
-      <Navigate
-        to="/admin-login"
-      />
-    );
-
-  }
+ if (
+    user.role !== "admin" &&
+    user.role !== "SUPER_ADMIN"
+) {
+    return <Navigate to="/admin-login" />;
+}
 
   // ✅ ADMIN
   return children;
